@@ -9,7 +9,7 @@ version = dict()
 
 # read _version.py as bytes, otherwise exec will complain about
 # 'coding: utf-8', which we want there for the normal Python 2 import
-with open('outcome/_version.py', 'rb') as fp:
+with open('src/outcome/_version.py', 'rb') as fp:
     version_mod = fp.read()
 
 exec(version_mod, version)
@@ -26,7 +26,8 @@ setup(
     author='Frazer McLean',
     author_email='frazer@frazermclean.co.uk',
     license='MIT -or- Apache License 2.0',
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     install_requires=['attrs'],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     keywords='result',
