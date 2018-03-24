@@ -1,0 +1,4 @@
+pytest
+pytest-cov
+trio; python_version >= '3.5'
+pytest-trio; python_version >= '3.5'
