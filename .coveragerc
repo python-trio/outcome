@@ -1,8 +1,8 @@
 [run]
-branch=True
-source=
+branch = True
+source =
     outcome
-    tests
+    tests/
 
 [report]
 precision = 1

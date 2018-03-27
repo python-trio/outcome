@@ -88,10 +88,7 @@ else
     # Actual tests
     pip install -Ur test-requirements.txt
 
-    mkdir empty
-    cd empty
-
-    pytest -W error -ra -v --pyargs outcome --cov=outcome --cov-config=../.coveragerc --verbose
+    pytest -W error -ra -v tests --cov --cov-config=.coveragerc
 
     bash <(curl -s https://codecov.io/bash)
 fi
