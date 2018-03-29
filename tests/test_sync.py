@@ -77,12 +77,12 @@ def test_Value_compare():
 
 
 def test_capture():
-    def return_arg(x):
-        return x
+    def add(x, y):
+        return x + y
 
-    v = outcome.capture(return_arg, 2)
+    v = outcome.capture(add, 2, y=3)
     assert type(v) == Value
-    assert v.unwrap() == 2
+    assert v.unwrap() == 5
 
     def raise_ValueError(x):
         raise ValueError(x)

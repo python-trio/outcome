@@ -9,15 +9,15 @@ from ._util import ABC
 __all__ = ['Error', 'Outcome', 'Value', 'capture']
 
 
-def capture(sync_fn, *args):
-    """Run ``sync_fn(*args)`` and capture the result.
+def capture(sync_fn, *args, **kwargs):
+    """Run ``sync_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
       Either a :class:`Value` or :class:`Error` as appropriate.
 
     """
     try:
-        return Value(sync_fn(*args))
+        return Value(sync_fn(*args, **kwargs))
     except BaseException as exc:
         return Error(exc)
 

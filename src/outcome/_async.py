@@ -7,8 +7,8 @@ from ._sync import (
 __all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
 
 
-def capture(sync_fn, *args):
-    """Run ``sync_fn(*args)`` and capture the result.
+def capture(sync_fn, *args, **kwargs):
+    """Run ``sync_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
       Either a :class:`Value` or :class:`Error` as appropriate.
@@ -16,20 +16,20 @@ def capture(sync_fn, *args):
     """
     # _sync.capture references ErrorBase and ValueBase
     try:
-        return Value(sync_fn(*args))
+        return Value(sync_fn(*args, **kwargs))
     except BaseException as exc:
         return Error(exc)
 
 
-async def acapture(async_fn, *args):
-    """Run ``await async_fn(*args)`` and capture the result.
+async def acapture(async_fn, *args, **kwargs):
+    """Run ``await async_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
       Either a :class:`Value` or :class:`Error` as appropriate.
 
     """
     try:
-        return Value(await async_fn(*args))
+        return Value(await async_fn(*args, **kwargs))
     except BaseException as exc:
         return Error(exc)
 
