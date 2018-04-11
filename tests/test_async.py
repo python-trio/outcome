@@ -11,11 +11,11 @@ pytestmark = pytest.mark.trio
 
 
 async def test_acapture():
-    async def return_arg(x):
+    async def add(x, y):
         await trio.hazmat.checkpoint()
-        return x
+        return x + y
 
-    v = await outcome.acapture(return_arg, 7)
+    v = await outcome.acapture(add, 3, y=4)
     assert v == Value(7)
 
     async def raise_ValueError(x):
