@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 import abc
 import attr
 
-from ._util import ABC
+from ._util import ABC, AlreadyUsedError
 
 __all__ = ['Error', 'Outcome', 'Value', 'capture']
 
@@ -21,7 +21,7 @@ def capture(sync_fn, *args, **kwargs):
     except BaseException as exc:
         return Error(exc)
 
-
+@attr.s(repr=False, init=False, slots=True)
 class Outcome(ABC):
     """An abstract class representing the result of a Python computation.
 
@@ -37,7 +37,13 @@ class Outcome(ABC):
     hashable.
 
     """
-    __slots__ = ()
+    _unwrapped = attr.ib(default=False, cmp=False, init=False)
+
+    def _set_unwrapped(self):
+        if self._unwrapped:
+            raise AlreadyUsedError
+        object.__setattr__(self, '_unwrapped', True)
+
 
     @abc.abstractmethod
     def unwrap(self):
@@ -62,7 +68,7 @@ class Outcome(ABC):
         """
 
 
-@attr.s(frozen=True, repr=False)
+@attr.s(frozen=True, repr=False, slots=True)
 class Value(Outcome):
     """Concrete :class:`Outcome` subclass representing a regular value.
 
@@ -75,13 +81,15 @@ class Value(Outcome):
         return 'Value({!r})'.format(self.value)
 
     def unwrap(self):
+        self._set_unwrapped()
         return self.value
 
     def send(self, gen):
+        self._set_unwrapped()
         return gen.send(self.value)
 
 
-@attr.s(frozen=True, repr=False)
+@attr.s(frozen=True, repr=False, slots=True)
 class Error(Outcome):
     """Concrete :class:`Outcome` subclass representing a raised exception.
 
@@ -94,7 +102,10 @@ class Error(Outcome):
         return 'Error({!r})'.format(self.error)
 
     def unwrap(self):
+        self._set_unwrapped()
         raise self.error
 
     def send(self, it):
+        self._set_unwrapped()
         return it.throw(self.error)
+

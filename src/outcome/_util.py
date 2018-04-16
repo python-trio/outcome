@@ -6,6 +6,11 @@ import abc
 import sys
 
 
+class AlreadyUsedError(RuntimeError):
+    """An Outcome may not be unwrapped twice."""
+    pass
+
+
 def fixup_module_metadata(module_name, namespace):
     def fix_one(obj):
         mod = getattr(obj, "__module__", None)

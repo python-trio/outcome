@@ -25,4 +25,7 @@ which, like before, is the same as::
 
     x = await f(*args, **kwargs)
 
+An Outcome object may not be unwrapped twice. Attempting to do so will
+raise an :class:`AlreadyUsedError`.
+
 See the :ref:`api-reference` for the types involved.

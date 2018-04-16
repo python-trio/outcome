@@ -5,7 +5,7 @@ import sys
 import pytest
 
 import outcome
-from outcome import Error, Value
+from outcome import Error, Value, AlreadyUsedError
 
 
 def test_Outcome():
@@ -14,13 +14,21 @@ def test_Outcome():
     assert v.unwrap() == 1
     assert repr(v) == "Value(1)"
 
+    with pytest.raises(AlreadyUsedError):
+        v.unwrap()
+
+    v = Value(1)
+
     exc = RuntimeError("oops")
     e = Error(exc)
     assert e.error is exc
     with pytest.raises(RuntimeError):
         e.unwrap()
+    with pytest.raises(AlreadyUsedError):
+        e.unwrap()
     assert repr(e) == "Error({!r})".format(exc)
 
+    e = Error(exc)
     with pytest.raises(TypeError):
         Error("hello")
     with pytest.raises(TypeError):
@@ -33,6 +41,8 @@ def test_Outcome():
     it = iter(expect_1())
     next(it)
     assert v.send(it) == "ok"
+    with pytest.raises(AlreadyUsedError):
+        v.send(it)
 
     def expect_RuntimeError():
         with pytest.raises(RuntimeError):
@@ -42,6 +52,8 @@ def test_Outcome():
     it = iter(expect_RuntimeError())
     next(it)
     assert e.send(it) == "ok"
+    with pytest.raises(AlreadyUsedError):
+        e.send(it)
 
 
 def test_Outcome_eq_hash():

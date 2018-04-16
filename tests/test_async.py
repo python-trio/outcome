@@ -5,7 +5,7 @@ import trio
 from async_generator import async_generator, yield_
 
 import outcome
-from outcome import Error, Value
+from outcome import Error, Value, AlreadyUsedError
 
 pytestmark = pytest.mark.trio
 
@@ -38,8 +38,15 @@ async def test_asend():
     my_agen = my_agen_func().__aiter__()
     if sys.version_info < (3, 5, 2):
         my_agen = await my_agen
+    v = Value("value")
+    e = Error(KeyError())
     assert (await my_agen.asend(None)) == 1
-    assert (await Value("value").asend(my_agen)) == 2
-    assert (await Error(KeyError()).asend(my_agen)) == 3
+    assert (await v.asend(my_agen)) == 2
+    with pytest.raises(AlreadyUsedError):
+        await v.asend(my_agen)
+
+    assert (await e.asend(my_agen)) == 3
+    with pytest.raises(AlreadyUsedError):
+        await e.asend(my_agen)
     with pytest.raises(StopAsyncIteration):
         await my_agen.asend(None)
