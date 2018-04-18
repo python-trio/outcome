@@ -21,3 +21,5 @@ API Reference
 .. autoclass:: Error
    :members:
    :inherited-members:
+
+.. autoclass:: AlreadyUsedError

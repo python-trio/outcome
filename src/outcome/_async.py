@@ -4,6 +4,7 @@ from ._sync import (
     Error as ErrorBase, Outcome as OutcomeBase, Value as ValueBase
 )
 
+from ._util import AlreadyUsedError
 __all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
 
 
@@ -49,11 +50,13 @@ class Outcome(OutcomeBase):
 
 class Value(ValueBase):
     async def asend(self, agen):
+        self._set_unwrapped()
         return await agen.asend(self.value)
 
 
 class Error(ErrorBase):
     async def asend(self, agen):
+        self._set_unwrapped()
         return await agen.athrow(self.error)
 
 
