@@ -1,25 +1,25 @@
+import asyncio
 import sys
 
 import pytest
-import trio
 from async_generator import async_generator, yield_
 
 import outcome
 from outcome import Error, Value, AlreadyUsedError
 
-pytestmark = pytest.mark.trio
+pytestmark = pytest.mark.asyncio
 
 
 async def test_acapture():
     async def add(x, y):
-        await trio.hazmat.checkpoint()
+        await asyncio.sleep(0)
         return x + y
 
     v = await outcome.acapture(add, 3, y=4)
     assert v == Value(7)
 
     async def raise_ValueError(x):
-        await trio.hazmat.checkpoint()
+        await asyncio.sleep(0)
         raise ValueError(x)
 
     e = await outcome.acapture(raise_ValueError, 9)
