@@ -53,8 +53,11 @@ fi
 
 pip install -U pip setuptools wheel
 
+python setup.py sdist --formats=zip
+pip install dist/*.zip
+
 if [ "$CHECK_FORMATTING" = "1" ]; then
-    pip install yapf==${YAPF_VERSION}
+    pip install yapf==${YAPF_VERSION} isort
     if ! yapf -rpd setup.py src tests; then
         cat <<EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -72,11 +75,29 @@ in your local checkout.
 EOF
         exit 1
     fi
+
+    # required for isort to order test imports correctly
+    pip install -Ur test-requirements.txt
+
+    if ! isort --recursive --check-only --diff . ; then
+        cat <<EOF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Formatting problems were found (listed above). To fix them, run
+
+   pip install isort
+   isort --recursive .
+
+in your local checkout.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+EOF
+        exit 1
+    fi
     exit 0
 fi
-
-python setup.py sdist --formats=zip
-pip install dist/*.zip
 
 if [ "$CHECK_DOCS" = "1" ]; then
     pip install -Ur ci/rtd-requirements.txt

@@ -5,7 +5,7 @@ import trio
 from async_generator import async_generator, yield_
 
 import outcome
-from outcome import Error, Value, AlreadyUsedError
+from outcome import AlreadyUsedError, Error, Value
 
 pytestmark = pytest.mark.trio
 
