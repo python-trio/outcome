@@ -14,10 +14,10 @@ To run yapf
 -----------
 
 * Show what changes yapf wants to make: ``yapf -rpd setup.py
-  outcome``
+  src tests``
 
 * Apply all changes directly to the source tree: ``yapf -rpi setup.py
-  outcome``
+  src tests``
 
 
 To make a release
