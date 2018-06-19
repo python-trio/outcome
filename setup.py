@@ -21,6 +21,10 @@ setup(
     version=version['__version__'],
     description='Capture the outcome of Python function calls.',
     url='https://github.com/python-trio/outcome',
+    project_urls={
+        "Documentation": "https://outcome.readthedocs.io/en/latest/",
+        "Chat": "https://gitter.im/python-trio/general",
+    },
     long_description=LONG_DESC,
     long_description_content_type='text/x-rst',
     author='Frazer McLean',
