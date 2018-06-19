@@ -21,6 +21,7 @@ def capture(sync_fn, *args, **kwargs):
     except BaseException as exc:
         return Error(exc)
 
+
 @attr.s(repr=False, init=False, slots=True)
 class Outcome(ABC):
     """An abstract class representing the result of a Python computation.
@@ -43,7 +44,6 @@ class Outcome(ABC):
         if self._unwrapped:
             raise AlreadyUsedError
         object.__setattr__(self, '_unwrapped', True)
-
 
     @abc.abstractmethod
     def unwrap(self):
@@ -108,4 +108,3 @@ class Error(Outcome):
     def send(self, it):
         self._set_unwrapped()
         return it.throw(self.error)
-
