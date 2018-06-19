@@ -1,0 +1,5 @@
+outcome (0.1.0-1) smurf; urgency=low
+
+  * source package automatically created by stdeb 0.8.5
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 19 Jun 2018 08:00:25 +0200
