@@ -1,3 +1,9 @@
+outcome (0.1.0-2) unstable; urgency=medium
+
+  * remove debug calls
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 05 Jul 2018 13:55:05 +0200
+
 outcome (0.1.0-1) smurf; urgency=low
 
   * source package automatically created by stdeb 0.8.5
