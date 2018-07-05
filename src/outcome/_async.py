@@ -3,7 +3,6 @@ import abc
 from ._sync import Error as ErrorBase
 from ._sync import Outcome as OutcomeBase
 from ._sync import Value as ValueBase
-from ._util import AlreadyUsedError
 
 __all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
 
