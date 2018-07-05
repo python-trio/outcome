@@ -48,13 +48,13 @@ class Outcome(OutcomeBase):
         """
 
 
-class Value(ValueBase):
+class Value(Outcome, ValueBase):
     async def asend(self, agen):
         self._set_unwrapped()
         return await agen.asend(self.value)
 
 
-class Error(ErrorBase):
+class Error(Outcome, ErrorBase):
     async def asend(self, agen):
         self._set_unwrapped()
         return await agen.athrow(self.error)

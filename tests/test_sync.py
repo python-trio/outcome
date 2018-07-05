@@ -103,3 +103,8 @@ def test_capture():
     assert type(e) == Error
     assert type(e.error) is ValueError
     assert e.error.args == ("two",)
+
+
+def test_inheritance():
+    assert issubclass(Value, outcome.Outcome)
+    assert issubclass(Error, outcome.Outcome)
