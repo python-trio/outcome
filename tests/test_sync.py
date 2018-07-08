@@ -1,11 +1,12 @@
 # coding: utf-8
 from __future__ import absolute_import, division, print_function
+
 import sys
 
 import pytest
 
 import outcome
-from outcome import Error, Value, AlreadyUsedError
+from outcome import AlreadyUsedError, Error, Value
 
 
 def test_Outcome():
