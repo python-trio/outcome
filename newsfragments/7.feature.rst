@@ -1,3 +1,0 @@
-An Outcome may only be unwrapped or sent once.
-
-Attempting to do so a second time will raise an :class:`AlreadyUsedError`.
