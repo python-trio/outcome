@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import sys
+import traceback
 
 import pytest
 
@@ -109,3 +110,19 @@ def test_capture():
 def test_inheritance():
     assert issubclass(Value, outcome.Outcome)
     assert issubclass(Error, outcome.Outcome)
+
+
+@pytest.mark.skipif(sys.version_info < (3,), reason="requires python 3")
+def test_traceback_frame_removal():
+    def raise_ValueError(x):
+        raise ValueError(x)
+
+    e = outcome.capture(raise_ValueError, 'abc')
+    try:
+        e.unwrap()
+    except Exception as exc:
+        frames = traceback.extract_tb(exc.__traceback__)
+        functions = [function for _, _, function, _ in frames]
+        assert functions[-2:] == ['unwrap', 'raise_ValueError']
+    else:
+        pytest.fail('Did not raise')

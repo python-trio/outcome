@@ -24,6 +24,15 @@ def fixup_module_metadata(module_name, namespace):
         fix_one(obj)
 
 
+def remove_tb_frames(exc, n):
+    if sys.version_info < (3,):
+        return exc
+    tb = exc.__traceback__
+    for _ in range(n):
+        tb = tb.tb_next
+    return exc.with_traceback(tb)
+
+
 if sys.version_info < (3,):
 
     class ABC(object):

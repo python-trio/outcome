@@ -5,7 +5,7 @@ import abc
 
 import attr
 
-from ._util import ABC, AlreadyUsedError
+from ._util import ABC, AlreadyUsedError, remove_tb_frames
 
 __all__ = ['Error', 'Outcome', 'Value', 'capture']
 
@@ -20,6 +20,7 @@ def capture(sync_fn, *args, **kwargs):
     try:
         return Value(sync_fn(*args, **kwargs))
     except BaseException as exc:
+        exc = remove_tb_frames(exc, 1)
         return Error(exc)
 
 
@@ -104,7 +105,10 @@ class Error(Outcome):
 
     def unwrap(self):
         self._set_unwrapped()
-        raise self.error
+        # Tracebacks show the 'raise' line below out of context, so let's give
+        # this variable a name that makes sense out of context.
+        captured_error = self.error
+        raise captured_error
 
     def send(self, it):
         self._set_unwrapped()

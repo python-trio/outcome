@@ -1,0 +1,2 @@
+On Python 3, the exception frame generated within :func:`capture` and
+:func:`acapture` has been removed from the traceback.

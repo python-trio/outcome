@@ -3,6 +3,7 @@ import abc
 from ._sync import Error as ErrorBase
 from ._sync import Outcome as OutcomeBase
 from ._sync import Value as ValueBase
+from ._util import remove_tb_frames
 
 __all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
 
@@ -18,6 +19,7 @@ def capture(sync_fn, *args, **kwargs):
     try:
         return Value(sync_fn(*args, **kwargs))
     except BaseException as exc:
+        exc = remove_tb_frames(exc, 1)
         return Error(exc)
 
 
@@ -31,6 +33,7 @@ async def acapture(async_fn, *args, **kwargs):
     try:
         return Value(await async_fn(*args, **kwargs))
     except BaseException as exc:
+        exc = remove_tb_frames(exc, 1)
         return Error(exc)
 
 
