@@ -118,11 +118,8 @@ def test_traceback_frame_removal():
         raise ValueError(x)
 
     e = outcome.capture(raise_ValueError, 'abc')
-    try:
+    with pytest.raises(ValueError) as exc_info:
         e.unwrap()
-    except Exception as exc:
-        frames = traceback.extract_tb(exc.__traceback__)
-        functions = [function for _, _, function, _ in frames]
-        assert functions[-2:] == ['unwrap', 'raise_ValueError']
-    else:
-        pytest.fail('Did not raise')
+    frames = traceback.extract_tb(exc_info.value.__traceback__)
+    functions = [function for _, _, function, _ in frames]
+    assert functions[-2:] == ['unwrap', 'raise_ValueError']
