@@ -1,4 +1,4 @@
 pytest
 pytest-cov
-trio; python_version >= '3.5'
-pytest-trio; python_version >= '3.5'
+pytest-asyncio; python_version >= '3.5'
+async-generator; python_version >= '3.5'
