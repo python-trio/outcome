@@ -36,7 +36,7 @@ setup(
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     keywords='result',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Framework :: Trio',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
