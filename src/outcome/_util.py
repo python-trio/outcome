@@ -6,7 +6,7 @@ import sys
 
 
 class AlreadyUsedError(RuntimeError):
-    """An Outcome may not be unwrapped twice."""
+    """An Outcome can only be unwrapped once."""
     pass
 
 
