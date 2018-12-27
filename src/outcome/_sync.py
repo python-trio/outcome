@@ -54,7 +54,7 @@ class Outcome(ABC):
         These two lines of code are equivalent::
 
            x = fn(*args)
-           x = Result.capture(fn, *args).unwrap()
+           x = outcome.capture(fn, *args).unwrap()
 
         """
 
