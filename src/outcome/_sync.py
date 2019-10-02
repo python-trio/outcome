@@ -40,7 +40,7 @@ class Outcome(ABC):
     hashable.
 
     """
-    _unwrapped = attr.ib(default=False, cmp=False, init=False)
+    _unwrapped = attr.ib(default=False, eq=False, init=False)
 
     def _set_unwrapped(self):
         if self._unwrapped:

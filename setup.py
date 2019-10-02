@@ -32,7 +32,7 @@ setup(
     license='MIT -or- Apache License 2.0',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    install_requires=['attrs'],
+    install_requires=['attrs>=19.2.0'],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     keywords='result',
     classifiers=[
