@@ -5,6 +5,12 @@ Release history
 
 .. towncrier release notes start
 
+Outcome 1.0.1 (2019-10-16)
+--------------------------
+
+Upgrade to attrs 19.2.0.
+
+
 Outcome 1.0.0 (2018-09-12)
 --------------------------
 
