@@ -1,9 +1,7 @@
 import asyncio
-import sys
 import traceback
 
 import pytest
-from async_generator import async_generator, yield_
 
 import outcome
 from outcome import AlreadyUsedError, Error, Value
@@ -29,16 +27,13 @@ async def test_acapture():
 
 
 async def test_asend():
-    @async_generator
     async def my_agen_func():
-        assert (await yield_(1)) == "value"
+        assert (yield 1) == "value"
         with pytest.raises(KeyError):
-            await yield_(2)
-        await yield_(3)
+            yield 2
+        yield 3
 
     my_agen = my_agen_func().__aiter__()
-    if sys.version_info < (3, 5, 2):
-        my_agen = await my_agen
     v = Value("value")
     e = Error(KeyError())
     assert (await my_agen.asend(None)) == 1

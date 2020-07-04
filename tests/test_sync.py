@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import absolute_import, division, print_function
-
 import sys
 import traceback
 
@@ -28,7 +25,7 @@ def test_Outcome():
         e.unwrap()
     with pytest.raises(AlreadyUsedError):
         e.unwrap()
-    assert repr(e) == "Error({!r})".format(exc)
+    assert repr(e) == f"Error({exc!r})"
 
     e = Error(exc)
     with pytest.raises(TypeError):
@@ -82,7 +79,6 @@ def test_Outcome_eq_hash():
     assert {e1, e2, e3, e4} == {e1, e3}
 
 
-@pytest.mark.skipif(sys.version_info < (3,), reason="requires python 3")
 def test_Value_compare():
     assert Value(1) < Value(2)
     assert not Value(3) < Value(2)
@@ -112,7 +108,6 @@ def test_inheritance():
     assert issubclass(Error, outcome.Outcome)
 
 
-@pytest.mark.skipif(sys.version_info < (3,), reason="requires python 3")
 def test_traceback_frame_removal():
     def raise_ValueError(x):
         raise ValueError(x)
