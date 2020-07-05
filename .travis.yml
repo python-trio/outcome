@@ -7,6 +7,8 @@ matrix:
       env: CHECK_DOCS=1
     - python: 3.8
       env: CHECK_FORMATTING=1
+    - python: 3.8
+      env: CHECK_MYPY=1
     - python: pypy3.6-7.2.0
     - python: 3.6
     - python: 3.7

@@ -1,14 +1,26 @@
 import sys
 import traceback
+from typing import (
+    TYPE_CHECKING, Any, Generator, Iterator, List, NoReturn, Optional, TypeVar
+)
 
 import pytest
 
 import outcome
-from outcome import AlreadyUsedError, Error, Value
+from outcome import AlreadyUsedError, Error, Outcome, Value
+
+V = TypeVar('V')
+E = TypeVar('E', bound=BaseException)
+
+if TYPE_CHECKING:
+    TValue = Value[V, BaseException]
+    TError = Error[NoReturn, E]
+else:
+    TValue = TError = Any
 
 
-def test_Outcome():
-    v = Value(1)
+def test_Outcome() -> None:
+    v: TValue[int] = Value(1)
     assert v.value == 1
     assert v.unwrap() == 1
     assert repr(v) == "Value(1)"
@@ -19,7 +31,7 @@ def test_Outcome():
     v = Value(1)
 
     exc = RuntimeError("oops")
-    e = Error(exc)
+    e: TError[RuntimeError] = Error(exc)
     assert e.error is exc
     with pytest.raises(RuntimeError):
         e.unwrap()
@@ -33,7 +45,7 @@ def test_Outcome():
     with pytest.raises(TypeError):
         Error(RuntimeError)
 
-    def expect_1():
+    def expect_1() -> Generator[Optional[str], int, None]:
         assert (yield) == 1
         yield "ok"
 
@@ -43,7 +55,7 @@ def test_Outcome():
     with pytest.raises(AlreadyUsedError):
         v.send(it)
 
-    def expect_RuntimeError():
+    def expect_RuntimeError() -> Iterator[Optional[str]]:
         with pytest.raises(RuntimeError):
             yield
         yield "ok"
@@ -55,11 +67,11 @@ def test_Outcome():
         e.send(it)
 
 
-def test_Outcome_eq_hash():
-    v1 = Value(["hello"])
-    v2 = Value(["hello"])
-    v3 = Value("hello")
-    v4 = Value("hello")
+def test_Outcome_eq_hash() -> None:
+    v1: TValue[List[str]] = Value(["hello"])
+    v2: TValue[List[str]] = Value(["hello"])
+    v3: TValue[str] = Value("hello")
+    v4: TValue[str] = Value("hello")
     assert v1 == v2
     assert v1 != v3
     with pytest.raises(TypeError):
@@ -69,50 +81,51 @@ def test_Outcome_eq_hash():
     # exceptions in general compare by identity
     exc1 = RuntimeError("oops")
     exc2 = KeyError("foo")
-    e1 = Error(exc1)
-    e2 = Error(exc1)
-    e3 = Error(exc2)
-    e4 = Error(exc2)
+    e1: TError[RuntimeError] = Error(exc1)
+    e2: TError[RuntimeError] = Error(exc1)
+    e3: TError[KeyError] = Error(exc2)
+    e4: TError[KeyError] = Error(exc2)
     assert e1 == e2
     assert e3 == e4
     assert e1 != e3
     assert {e1, e2, e3, e4} == {e1, e3}
 
 
-def test_Value_compare():
+def test_Value_compare() -> None:
     assert Value(1) < Value(2)
     assert not Value(3) < Value(2)
     with pytest.raises(TypeError):
-        Value(1) < Value("foo")
+        Value(1) < Value("foo")  # type: ignore
 
 
-def test_capture():
-    def add(x, y):
+def test_capture() -> None:
+    def add(x: int, y: int) -> int:
         return x + y
 
-    v = outcome.capture(add, 2, y=3)
+    v: Outcome[int, BaseException] = outcome.capture(add, 2, y=3)
     assert type(v) == Value
     assert v.unwrap() == 5
 
-    def raise_ValueError(x):
+    def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
-    e = outcome.capture(raise_ValueError, "two")
-    assert type(e) == Error
+    e: Outcome[NoReturn, ValueError] = outcome.capture(raise_ValueError, "two")
+    assert type(e) is Error
+    assert isinstance(e, Error)  # narrow type for mypy
     assert type(e.error) is ValueError
     assert e.error.args == ("two",)
 
 
-def test_inheritance():
+def test_inheritance() -> None:
     assert issubclass(Value, outcome.Outcome)
     assert issubclass(Error, outcome.Outcome)
 
 
-def test_traceback_frame_removal():
-    def raise_ValueError(x):
+def test_traceback_frame_removal() -> None:
+    def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
-    e = outcome.capture(raise_ValueError, 'abc')
+    e: Outcome[NoReturn, ValueError] = outcome.capture(raise_ValueError, 'abc')
     with pytest.raises(ValueError) as exc_info:
         e.unwrap()
     frames = traceback.extract_tb(exc_info.value.__traceback__)
