@@ -14,7 +14,6 @@ def capture(sync_fn, *args, **kwargs):
       Either a :class:`Value` or :class:`Error` as appropriate.
 
     """
-    # _sync.capture references ErrorBase and ValueBase
     try:
         return Value(sync_fn(*args, **kwargs))
     except BaseException as exc:
