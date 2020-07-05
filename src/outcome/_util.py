@@ -1,6 +1,3 @@
-import sys
-
-
 class AlreadyUsedError(RuntimeError):
     """An Outcome can only be unwrapped once."""
     pass
