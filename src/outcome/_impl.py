@@ -1,13 +1,10 @@
-# coding: utf-8
-from __future__ import absolute_import, division, print_function
-
 import abc
 
 import attr
 
-from ._util import ABC, AlreadyUsedError, remove_tb_frames
+from ._util import AlreadyUsedError, remove_tb_frames
 
-__all__ = ['Error', 'Outcome', 'Value', 'capture']
+__all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
 
 
 def capture(sync_fn, *args, **kwargs):
@@ -24,8 +21,22 @@ def capture(sync_fn, *args, **kwargs):
         return Error(exc)
 
 
+async def acapture(async_fn, *args, **kwargs):
+    """Run ``await async_fn(*args, **kwargs)`` and capture the result.
+
+    Returns:
+      Either a :class:`Value` or :class:`Error` as appropriate.
+
+    """
+    try:
+        return Value(await async_fn(*args, **kwargs))
+    except BaseException as exc:
+        exc = remove_tb_frames(exc, 1)
+        return Error(exc)
+
+
 @attr.s(repr=False, init=False, slots=True)
-class Outcome(ABC):
+class Outcome(abc.ABC):
     """An abstract class representing the result of a Python computation.
 
     This class has two concrete subclasses: :class:`Value` representing a
@@ -69,6 +80,17 @@ class Outcome(ABC):
 
         """
 
+    @abc.abstractmethod
+    async def asend(self, agen):
+        """Send or throw the contained value or exception into the given async
+        generator object.
+
+        Args:
+          agen: An async generator object supporting ``.asend()`` and
+              ``.athrow()`` methods.
+
+        """
+
 
 @attr.s(frozen=True, repr=False, slots=True)
 class Value(Outcome):
@@ -80,7 +102,7 @@ class Value(Outcome):
     """The contained value."""
 
     def __repr__(self):
-        return 'Value({!r})'.format(self.value)
+        return f'Value({self.value!r})'
 
     def unwrap(self):
         self._set_unwrapped()
@@ -89,6 +111,10 @@ class Value(Outcome):
     def send(self, gen):
         self._set_unwrapped()
         return gen.send(self.value)
+
+    async def asend(self, agen):
+        self._set_unwrapped()
+        return await agen.asend(self.value)
 
 
 @attr.s(frozen=True, repr=False, slots=True)
@@ -101,7 +127,7 @@ class Error(Outcome):
     """The contained exception object."""
 
     def __repr__(self):
-        return 'Error({!r})'.format(self.error)
+        return f'Error({self.error!r})'
 
     def unwrap(self):
         self._set_unwrapped()
@@ -113,3 +139,7 @@ class Error(Outcome):
     def send(self, it):
         self._set_unwrapped()
         return it.throw(self.error)
+
+    async def asend(self, agen):
+        self._set_unwrapped()
+        return await agen.athrow(self.error)

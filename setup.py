@@ -1,20 +1,13 @@
-# coding: utf-8
-from __future__ import absolute_import, division, print_function
-
-from io import open
-
 from setuptools import find_packages, setup
 
 version = dict()
 
-# read _version.py as bytes, otherwise exec will complain about
-# 'coding: utf-8', which we want there for the normal Python 2 import
-with open('src/outcome/_version.py', 'rb') as fp:
+with open('src/outcome/_version.py') as fp:
     version_mod = fp.read()
 
 exec(version_mod, version)
 
-LONG_DESC = open('README.rst', encoding='utf-8').read()
+LONG_DESC = open('README.rst').read()
 
 setup(
     name='outcome',
@@ -33,7 +26,7 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     install_requires=['attrs>=19.2.0'],
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
+    python_requires='>=3.6',
     keywords='result',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -44,10 +37,9 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],

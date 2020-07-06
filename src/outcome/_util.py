@@ -1,10 +1,3 @@
-# coding: utf-8
-from __future__ import absolute_import, division, print_function
-
-import abc
-import sys
-
-
 class AlreadyUsedError(RuntimeError):
     """An Outcome can only be unwrapped once."""
     pass
@@ -25,17 +18,7 @@ def fixup_module_metadata(module_name, namespace):
 
 
 def remove_tb_frames(exc, n):
-    if sys.version_info < (3,):
-        return exc
     tb = exc.__traceback__
     for _ in range(n):
         tb = tb.tb_next
     return exc.with_traceback(tb)
-
-
-if sys.version_info < (3,):
-
-    class ABC(object):
-        __metaclass__ = abc.ABCMeta
-else:
-    ABC = abc.ABC

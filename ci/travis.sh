@@ -45,7 +45,7 @@ python setup.py sdist --formats=zip
 pip install dist/*.zip
 
 if [ "$CHECK_FORMATTING" = "1" ]; then
-    pip install yapf==${YAPF_VERSION} isort
+    pip install yapf==${YAPF_VERSION} isort>=5
     if ! yapf -rpd setup.py src tests; then
         cat <<EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -67,7 +67,7 @@ EOF
     # required for isort to order test imports correctly
     pip install -Ur test-requirements.txt
 
-    if ! isort --recursive --check-only --diff . ; then
+    if ! isort --check-only --diff . ; then
         cat <<EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -75,7 +75,7 @@ EOF
 Formatting problems were found (listed above). To fix them, run
 
    pip install isort
-   isort --recursive .
+   isort .
 
 in your local checkout.
 

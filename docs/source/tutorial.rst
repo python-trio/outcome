@@ -16,7 +16,7 @@ is the same as::
 
 even if ``f`` raises an error.
 
-On Python 3.5+, there's also :func:`acapture`::
+There's also :func:`acapture`::
 
     result = await outcome.acapture(f, *args, **kwargs)
     x = result.unwrap()
