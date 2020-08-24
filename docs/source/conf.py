@@ -29,7 +29,6 @@ nitpick_ignore = [
     ('py:obj', 'bytes-like'),
     # https://github.com/sphinx-doc/sphinx/issues/7722
     ('py:class', 'V'),
-    ('py:class', 'E'),
     ('py:class', 'R'),
     ('py:class', 'Y'),
 ]
