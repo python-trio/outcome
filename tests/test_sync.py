@@ -1,26 +1,15 @@
 import sys
 import traceback
-from typing import (
-    TYPE_CHECKING, Any, Generator, Iterator, List, NoReturn, Optional, TypeVar
-)
+from typing import Generator, Iterator, NoReturn, Optional
 
 import pytest
 
 import outcome
 from outcome import AlreadyUsedError, Error, Outcome, Value
 
-V = TypeVar('V')
-E = TypeVar('E', bound=BaseException)
-
-if TYPE_CHECKING:
-    TValue = Value[V, BaseException]
-    TError = Error[NoReturn, E]
-else:
-    TValue = TError = Any
-
 
 def test_Outcome() -> None:
-    v: TValue[int] = Value(1)
+    v = Value(1)
     assert v.value == 1
     assert v.unwrap() == 1
     assert repr(v) == "Value(1)"
@@ -31,7 +20,7 @@ def test_Outcome() -> None:
     v = Value(1)
 
     exc = RuntimeError("oops")
-    e: TError[RuntimeError] = Error(exc)
+    e: Error[NoReturn] = Error(exc)
     assert e.error is exc
     with pytest.raises(RuntimeError):
         e.unwrap()
@@ -68,12 +57,12 @@ def test_Outcome() -> None:
 
 
 def test_Outcome_eq_hash() -> None:
-    v1: TValue[List[str]] = Value(["hello"])
-    v2: TValue[List[str]] = Value(["hello"])
-    v3: TValue[str] = Value("hello")
-    v4: TValue[str] = Value("hello")
+    v1 = Value(["hello"])
+    v2 = Value(["hello"])
+    v3 = Value("hello")
+    v4 = Value("hello")
     assert v1 == v2
-    assert v1 != v3
+    assert v1 != v3  # type: ignore
     with pytest.raises(TypeError):
         {v1}
     assert {v3, v4} == {v3}
@@ -81,10 +70,10 @@ def test_Outcome_eq_hash() -> None:
     # exceptions in general compare by identity
     exc1 = RuntimeError("oops")
     exc2 = KeyError("foo")
-    e1: TError[RuntimeError] = Error(exc1)
-    e2: TError[RuntimeError] = Error(exc1)
-    e3: TError[KeyError] = Error(exc2)
-    e4: TError[KeyError] = Error(exc2)
+    e1: Error[NoReturn] = Error(exc1)
+    e2: Error[NoReturn] = Error(exc1)
+    e3: Error[NoReturn] = Error(exc2)
+    e4: Error[NoReturn] = Error(exc2)
     assert e1 == e2
     assert e3 == e4
     assert e1 != e3
@@ -102,14 +91,14 @@ def test_capture() -> None:
     def add(x: int, y: int) -> int:
         return x + y
 
-    v: Outcome[int, BaseException] = outcome.capture(add, 2, y=3)
+    v = outcome.capture(add, 2, y=3)
     assert type(v) == Value
     assert v.unwrap() == 5
 
     def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
-    e: Outcome[NoReturn, ValueError] = outcome.capture(raise_ValueError, "two")
+    e = outcome.capture(raise_ValueError, "two")
     assert type(e) is Error
     assert isinstance(e, Error)  # narrow type for mypy
     assert type(e.error) is ValueError
@@ -125,7 +114,7 @@ def test_traceback_frame_removal() -> None:
     def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
-    e: Outcome[NoReturn, ValueError] = outcome.capture(raise_ValueError, 'abc')
+    e = outcome.capture(raise_ValueError, 'abc')
     with pytest.raises(ValueError) as exc_info:
         e.unwrap()
     frames = traceback.extract_tb(exc_info.value.__traceback__)

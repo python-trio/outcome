@@ -1,7 +1,7 @@
 import abc
 from typing import (
     Any, AsyncGenerator, Awaitable, Callable, Generator, Generic, NoReturn,
-    TypeVar, cast
+    TypeVar
 )
 
 import attr
@@ -11,13 +11,12 @@ from ._util import AlreadyUsedError, remove_tb_frames
 __all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
 
 V = TypeVar('V')
-E = TypeVar('E', bound=BaseException)
 Y = TypeVar('Y')
 R = TypeVar('R')
 
 
 @attr.s(repr=False, init=False)
-class Outcome(Generic[V, E]):
+class Outcome(Generic[V]):
     """An abstract class representing the result of a Python computation.
 
     This class has two concrete subclasses: :class:`Value` representing a
@@ -78,7 +77,7 @@ class Outcome(Generic[V, E]):
 
 
 @attr.s(frozen=True, repr=False, slots=True)
-class Value(Outcome[V, E]):
+class Value(Outcome[V]):
     """Concrete :class:`Outcome` subclass representing a regular value.
 
     """
@@ -104,13 +103,13 @@ class Value(Outcome[V, E]):
 
 
 @attr.s(frozen=True, repr=False, slots=True)
-class Error(Outcome[V, E]):
+class Error(Outcome[V]):
     """Concrete :class:`Outcome` subclass representing a raised exception.
 
     """
 
     _unwrapped: bool = attr.ib(default=False, eq=False, init=False)
-    error: E = attr.ib(  # type: ignore
+    error: BaseException = attr.ib(
         validator=attr.validators.instance_of(BaseException)
     )
     """The contained exception object."""
@@ -154,7 +153,7 @@ class Error(Outcome[V, E]):
 
 
 def capture(sync_fn: Callable[..., V], *args: Any,
-            **kwargs: Any) -> Outcome[V, E]:
+            **kwargs: Any) -> Outcome[V]:
     """Run ``sync_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
@@ -165,14 +164,14 @@ def capture(sync_fn: Callable[..., V], *args: Any,
         return Value(sync_fn(*args, **kwargs))
     except BaseException as exc:
         exc = remove_tb_frames(exc, 1)
-        return Error(cast(E, exc))
+        return Error(exc)
 
 
 async def acapture(
         async_fn: Callable[..., Awaitable[V]],
         *args: Any,
         **kwargs: Any,
-) -> Outcome[V, E]:
+) -> Outcome[V]:
     """Run ``await async_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
@@ -183,4 +182,4 @@ async def acapture(
         return Value(await async_fn(*args, **kwargs))
     except BaseException as exc:
         exc = remove_tb_frames(exc, 1)
-        return Error(cast(E, exc))
+        return Error(exc)

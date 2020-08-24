@@ -1,24 +1,13 @@
 import asyncio
 import traceback
-from typing import (
-    TYPE_CHECKING, Any, AsyncGenerator, NoReturn, Optional, TypeVar
-)
+from typing import AsyncGenerator, NoReturn, Optional
 
 import pytest
 
 import outcome
-from outcome import AlreadyUsedError, Error, Outcome, Value
+from outcome import AlreadyUsedError, Error, Value
 
 pytestmark = pytest.mark.asyncio
-
-V = TypeVar('V')
-E = TypeVar('E', bound=BaseException)
-
-if TYPE_CHECKING:
-    TValue = Value[V, BaseException]
-    TError = Error[NoReturn, E]
-else:
-    TValue = TError = Any
 
 
 async def test_acapture() -> None:
@@ -26,16 +15,14 @@ async def test_acapture() -> None:
         await asyncio.sleep(0)
         return x + y
 
-    v: Outcome[int, BaseException] = await outcome.acapture(add, 3, y=4)
+    v = await outcome.acapture(add, 3, y=4)
     assert v == Value(7)
 
     async def raise_ValueError(x: str) -> NoReturn:
         await asyncio.sleep(0)
         raise ValueError(x)
 
-    e: Outcome[NoReturn, ValueError] = await outcome.acapture(
-        raise_ValueError, 9
-    )
+    e = await outcome.acapture(raise_ValueError, 9)
     assert isinstance(e, Error)
     assert type(e.error) is ValueError
     assert e.error.args == (9,)
@@ -49,8 +36,8 @@ async def test_asend() -> None:
         yield 3
 
     my_agen = my_agen_func().__aiter__()
-    v: TValue[str] = Value("value")
-    e: TError[KeyError] = Error(KeyError())
+    v = Value("value")
+    e: Error[NoReturn] = Error(KeyError())
     assert (await my_agen.asend(None)) == 1
     assert (await v.asend(my_agen)) == 2
     with pytest.raises(AlreadyUsedError):
@@ -67,9 +54,7 @@ async def test_traceback_frame_removal() -> None:
     async def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
-    e: Outcome[NoReturn, ValueError] = await outcome.acapture(
-        raise_ValueError, 'abc'
-    )
+    e = await outcome.acapture(raise_ValueError, 'abc')
     with pytest.raises(ValueError) as exc_info:
         e.unwrap()
     frames = traceback.extract_tb(exc_info.value.__traceback__)
