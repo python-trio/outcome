@@ -88,7 +88,7 @@ EOF
 fi
 
 if [ "$CHECK_MYPY" = "1" ]; then
-    pip install mypy
+    pip install mypy 'pytest>=6'
     if ! mypy src/outcome tests; then
         cat <<EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
