@@ -37,7 +37,7 @@ async def test_asend() -> None:
 
     my_agen = my_agen_func().__aiter__()
     v = Value("value")
-    e: Error[NoReturn] = Error(KeyError())
+    e = Error(KeyError())
     assert (await my_agen.asend(None)) == 1
     assert (await v.asend(my_agen)) == 2
     with pytest.raises(AlreadyUsedError):

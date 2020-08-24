@@ -107,7 +107,7 @@ class Value(Outcome[V]):
 
 
 @attr.s(frozen=True, repr=False, slots=True)
-class Error(Outcome[V]):
+class Error(Outcome[NoReturn]):
     """Concrete :class:`Outcome` subclass representing a raised exception.
 
     """
@@ -142,13 +142,13 @@ class Error(Outcome[V]):
             # __traceback__ from indirectly referencing 'captured_error'.
             del captured_error, self
 
-    def send(self, gen: Generator[Y, V, R]) -> Y:
+    def send(self, gen: Generator[Y, NoReturn, R]) -> Y:
         self._set_unwrapped()
         # TODO: This ignore can be removed when this fix is released:
         # https://github.com/python/typeshed/pull/4253
         return gen.throw(self.error)  # type: ignore
 
-    async def asend(self, agen: AsyncGenerator[Y, V]) -> Y:
+    async def asend(self, agen: AsyncGenerator[Y, NoReturn]) -> Y:
         self._set_unwrapped()
         # TODO: This ignore can be removed when this fix is released:
         # https://github.com/python/typeshed/pull/4253

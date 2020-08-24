@@ -20,7 +20,7 @@ def test_Outcome() -> None:
     v = Value(1)
 
     exc = RuntimeError("oops")
-    e: Error[NoReturn] = Error(exc)
+    e = Error(exc)
     assert e.error is exc
     with pytest.raises(RuntimeError):
         e.unwrap()
@@ -70,10 +70,10 @@ def test_Outcome_eq_hash() -> None:
     # exceptions in general compare by identity
     exc1 = RuntimeError("oops")
     exc2 = KeyError("foo")
-    e1: Error[NoReturn] = Error(exc1)
-    e2: Error[NoReturn] = Error(exc1)
-    e3: Error[NoReturn] = Error(exc2)
-    e4: Error[NoReturn] = Error(exc2)
+    e1 = Error(exc1)
+    e2 = Error(exc1)
+    e3 = Error(exc2)
+    e4 = Error(exc2)
     assert e1 == e2
     assert e3 == e4
     assert e1 != e3
