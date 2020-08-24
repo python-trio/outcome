@@ -27,6 +27,11 @@ nitpicky = True
 nitpick_ignore = [
     # Format is ('sphinx reference type', 'string'), e.g.:
     ('py:obj', 'bytes-like'),
+    # https://github.com/sphinx-doc/sphinx/issues/7722
+    ('py:class', 'V'),
+    ('py:class', 'E'),
+    ('py:class', 'R'),
+    ('py:class', 'Y'),
 ]
 
 # -- General configuration ------------------------------------------------
