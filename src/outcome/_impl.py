@@ -10,7 +10,7 @@ from ._util import AlreadyUsedError, remove_tb_frames
 
 __all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
 
-V = TypeVar('V')
+V = TypeVar('V', covariant=True)
 Y = TypeVar('Y')
 R = TypeVar('R')
 

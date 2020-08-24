@@ -139,3 +139,23 @@ def test_Error_unwrap_does_not_create_reference_cycles():
     unwrap_frame = exc.__traceback__.tb_next.tb_frame
     assert unwrap_frame.f_code.co_name == "unwrap"
     assert unwrap_frame.f_locals == {}
+
+
+def test_value_covariance() -> None:
+    """Check that Outcome is covariant over its value type.
+
+    This test is designed to be picked up by mypy so doesn't really need to
+    be executed.
+    """
+
+    class Animal:
+        pass
+
+    class Dog(Animal):
+        pass
+
+    def f1(o: Outcome[Animal]) -> None:
+        assert isinstance(o.unwrap(), Dog)
+
+    o: Outcome[Dog] = Value(Dog())
+    f1(o)  # Mypy error if V is not covariant
