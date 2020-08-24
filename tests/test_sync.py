@@ -159,3 +159,10 @@ def test_value_covariance() -> None:
 
     o: Outcome[Dog] = Value(Dog())
     f1(o)  # Mypy error if V is not covariant
+
+
+@pytest.mark.parametrize(  # type: ignore
+    'outcome', [Value(5), Error(ValueError())]  # type: ignore
+)
+def test_slots(outcome: Outcome[int]) -> None:
+    assert not hasattr(outcome, '__dict__')

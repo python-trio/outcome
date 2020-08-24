@@ -15,7 +15,11 @@ Y = TypeVar('Y')
 R = TypeVar('R')
 
 
-@attr.s(repr=False, init=False)
+@attr.s(
+    repr=False,
+    init=False,
+    these={'_unwrapped': attr.ib(default=False, eq=False, init=False)},
+)
 class Outcome(Generic[V]):
     """An abstract class representing the result of a Python computation.
 
@@ -32,9 +36,10 @@ class Outcome(Generic[V]):
 
     """
 
-    # This should be an attr.ib but attrs can't use slots on this class for now
-    # so we implement it in Value and Error directly.
+    # attrs has an issue with attr.ibs in the class body with subclasses of
+    # Generic, so it is passed to attr.s(these=...) instead.
     # https://github.com/python-attrs/attrs/issues/313
+    __slots__ = ('_unwrapped',)
     _unwrapped: bool
 
     def _set_unwrapped(self) -> None:
@@ -82,7 +87,6 @@ class Value(Outcome[V]):
 
     """
 
-    _unwrapped: bool = attr.ib(default=False, eq=False, init=False)
     value: V = attr.ib()
     """The contained value."""
 
@@ -108,7 +112,6 @@ class Error(Outcome[V]):
 
     """
 
-    _unwrapped: bool = attr.ib(default=False, eq=False, init=False)
     error: BaseException = attr.ib(
         validator=attr.validators.instance_of(BaseException)
     )
