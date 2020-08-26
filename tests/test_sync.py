@@ -1,12 +1,13 @@
 import traceback
+from typing import Generator, Iterator, NoReturn, Optional
 
 import pytest
 
 import outcome
-from outcome import AlreadyUsedError, Error, Value
+from outcome import AlreadyUsedError, Error, Outcome, Value
 
 
-def test_Outcome():
+def test_Outcome() -> None:
     v = Value(1)
     assert v.value == 1
     assert v.unwrap() == 1
@@ -32,7 +33,7 @@ def test_Outcome():
     with pytest.raises(TypeError):
         Error(RuntimeError)
 
-    def expect_1():
+    def expect_1() -> Generator[Optional[str], int, None]:
         assert (yield) == 1
         yield "ok"
 
@@ -42,7 +43,7 @@ def test_Outcome():
     with pytest.raises(AlreadyUsedError):
         v.send(it)
 
-    def expect_RuntimeError():
+    def expect_RuntimeError() -> Iterator[Optional[str]]:
         with pytest.raises(RuntimeError):
             yield
         yield "ok"
@@ -54,13 +55,13 @@ def test_Outcome():
         e.send(it)
 
 
-def test_Outcome_eq_hash():
+def test_Outcome_eq_hash() -> None:
     v1 = Value(["hello"])
     v2 = Value(["hello"])
     v3 = Value("hello")
     v4 = Value("hello")
     assert v1 == v2
-    assert v1 != v3
+    assert v1 != v3  # type: ignore
     with pytest.raises(TypeError):
         {v1}
     assert {v3, v4} == {v3}
@@ -78,37 +79,38 @@ def test_Outcome_eq_hash():
     assert {e1, e2, e3, e4} == {e1, e3}
 
 
-def test_Value_compare():
+def test_Value_compare() -> None:
     assert Value(1) < Value(2)
     assert not Value(3) < Value(2)
     with pytest.raises(TypeError):
-        Value(1) < Value("foo")
+        Value(1) < Value("foo")  # type: ignore
 
 
-def test_capture():
-    def add(x, y):
+def test_capture() -> None:
+    def add(x: int, y: int) -> int:
         return x + y
 
     v = outcome.capture(add, 2, y=3)
     assert type(v) == Value
     assert v.unwrap() == 5
 
-    def raise_ValueError(x):
+    def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
     e = outcome.capture(raise_ValueError, "two")
-    assert type(e) == Error
+    assert type(e) is Error
+    assert isinstance(e, Error)  # narrow type for mypy
     assert type(e.error) is ValueError
     assert e.error.args == ("two",)
 
 
-def test_inheritance():
+def test_inheritance() -> None:
     assert issubclass(Value, outcome.Outcome)
     assert issubclass(Error, outcome.Outcome)
 
 
-def test_traceback_frame_removal():
-    def raise_ValueError(x):
+def test_traceback_frame_removal() -> None:
+    def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
     e = outcome.capture(raise_ValueError, 'abc')
@@ -117,3 +119,30 @@ def test_traceback_frame_removal():
     frames = traceback.extract_tb(exc_info.value.__traceback__)
     functions = [function for _, _, function, _ in frames]
     assert functions[-2:] == ['unwrap', 'raise_ValueError']
+
+
+def test_value_covariance() -> None:
+    """Check that Outcome is covariant over its value type.
+
+    This test is designed to be picked up by mypy so doesn't really need to
+    be executed.
+    """
+
+    class Animal:
+        pass
+
+    class Dog(Animal):
+        pass
+
+    def f1(o: Outcome[Animal]) -> None:
+        assert isinstance(o.unwrap(), Dog)
+
+    o: Outcome[Dog] = Value(Dog())
+    f1(o)  # Mypy error if V is not covariant
+
+
+@pytest.mark.parametrize(  # type: ignore
+    'outcome', [Value(5), Error(ValueError())]  # type: ignore
+)
+def test_slots(outcome: Outcome[int]) -> None:
+    assert not hasattr(outcome, '__dict__')

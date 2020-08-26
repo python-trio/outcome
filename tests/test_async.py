@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+from typing import AsyncGenerator, NoReturn, Optional
 
 import pytest
 
@@ -9,25 +10,26 @@ from outcome import AlreadyUsedError, Error, Value
 pytestmark = pytest.mark.asyncio
 
 
-async def test_acapture():
-    async def add(x, y):
+async def test_acapture() -> None:
+    async def add(x: int, y: int) -> int:
         await asyncio.sleep(0)
         return x + y
 
     v = await outcome.acapture(add, 3, y=4)
     assert v == Value(7)
 
-    async def raise_ValueError(x):
+    async def raise_ValueError(x: str) -> NoReturn:
         await asyncio.sleep(0)
         raise ValueError(x)
 
     e = await outcome.acapture(raise_ValueError, 9)
+    assert isinstance(e, Error)
     assert type(e.error) is ValueError
     assert e.error.args == (9,)
 
 
-async def test_asend():
-    async def my_agen_func():
+async def test_asend() -> None:
+    async def my_agen_func() -> AsyncGenerator[int, Optional[str]]:
         assert (yield 1) == "value"
         with pytest.raises(KeyError):
             yield 2
@@ -48,8 +50,8 @@ async def test_asend():
         await my_agen.asend(None)
 
 
-async def test_traceback_frame_removal():
-    async def raise_ValueError(x):
+async def test_traceback_frame_removal() -> None:
+    async def raise_ValueError(x: str) -> NoReturn:
         raise ValueError(x)
 
     e = await outcome.acapture(raise_ValueError, 'abc')
