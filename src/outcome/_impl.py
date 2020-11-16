@@ -134,7 +134,22 @@ class Error(Outcome):
         # Tracebacks show the 'raise' line below out of context, so let's give
         # this variable a name that makes sense out of context.
         captured_error = self.error
-        raise captured_error
+        try:
+            raise captured_error
+        finally:
+            # We want to avoid creating a reference cycle here. Python does
+            # collect cycles just fine, so it wouldn't be the end of the world
+            # if we did create a cycle, but the cyclic garbage collector adds
+            # latency to Python programs, and the more cycles you create, the
+            # more often it runs, so it's nicer to avoid creating them in the
+            # first place. For more details see:
+            #
+            #    https://github.com/python-trio/trio/issues/1770
+            #
+            # In particuar, by deleting this local variables from the 'unwrap'
+            # methods frame, we avoid the 'captured_error' object's
+            # __traceback__ from indirectly referencing 'captured_error'.
+            del captured_error, self
 
     def send(self, it):
         self._set_unwrapped()

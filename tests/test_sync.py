@@ -1,3 +1,4 @@
+import sys
 import traceback
 
 import pytest
@@ -117,3 +118,22 @@ def test_traceback_frame_removal():
     frames = traceback.extract_tb(exc_info.value.__traceback__)
     functions = [function for _, _, function, _ in frames]
     assert functions[-2:] == ['unwrap', 'raise_ValueError']
+
+
+def test_Error_unwrap_does_not_create_reference_cycles():
+    # See comment in Error.unwrap for why reference cycles are tricky
+    exc = ValueError()
+    err = Error(exc)
+    try:
+        err.unwrap()
+    except ValueError:
+        pass
+    # Top frame in the traceback is the current test function; we don't care
+    # about it's references
+    assert exc.__traceback__.tb_frame is sys._getframe()
+    # The next frame down is the 'unwrap' frame; we want to make sure it
+    # doesn't reference the exception (or anything else for that matter, just
+    # to be thorough)
+    unwrap_frame = exc.__traceback__.tb_next.tb_frame
+    assert unwrap_frame.f_code.co_name == "unwrap"
+    assert unwrap_frame.f_locals == {}
