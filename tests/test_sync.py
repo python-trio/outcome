@@ -129,7 +129,7 @@ def test_Error_unwrap_does_not_create_reference_cycles():
     except ValueError:
         pass
     # Top frame in the traceback is the current test function; we don't care
-    # about it's references
+    # about its references
     assert exc.__traceback__.tb_frame is sys._getframe()
     # The next frame down is the 'unwrap' frame; we want to make sure it
     # doesn't reference the exception (or anything else for that matter, just
