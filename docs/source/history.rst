@@ -5,6 +5,25 @@ Release history
 
 .. towncrier release notes start
 
+Outcome 1.1.0 (2020-11-16)
+--------------------------
+
+Bugfixes
+~~~~~~~~
+
+- Tweaked the implementation of ``Error.unwrap`` to avoid creating a
+  reference cycle between the exception object and the ``unwrap``
+  method's frame. This shouldn't affect most users, but it slightly
+  reduces the amount of work that CPython's cycle collector has to do,
+  and may reduce GC pauses in some cases. (`#29 <https://github.com/python-trio/outcome/issues/29>`__)
+
+
+Deprecations and Removals
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Drop support for Python 2.7, 3.4, and 3.5. (`#27 <https://github.com/python-trio/outcome/issues/27>`__)
+
+
 Outcome 1.0.1 (2019-10-16)
 --------------------------
 
