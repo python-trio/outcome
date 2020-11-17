@@ -1,0 +1,5 @@
+Tweaked the implementation of ``Error.unwrap`` to avoid creating a
+reference cycle between the exception object and the ``unwrap``
+method's frame. This shouldn't affect most users, but it slightly
+reduces the amount of work that CPython's cycle collector has to do,
+and may reduce GC pauses in some cases.
