@@ -30,30 +30,30 @@ def test_Outcome() -> None:
 
     e = Error(exc)
     with pytest.raises(TypeError):
-        Error("hello")
+        Error("hello")  # type: ignore[arg-type]
     with pytest.raises(TypeError):
-        Error(RuntimeError)
+        Error(RuntimeError)  # type: ignore[arg-type]
 
     def expect_1() -> Generator[Optional[str], int, None]:
-        assert (yield) == 1
+        assert (yield) == 1  # type: ignore[misc]
         yield "ok"
 
     it = iter(expect_1())
     next(it)
-    assert v.send(it) == "ok"
+    assert v.send(it) == "ok"  # type: ignore[arg-type]
     with pytest.raises(AlreadyUsedError):
-        v.send(it)
+        v.send(it)  # type: ignore[arg-type]
 
     def expect_RuntimeError() -> Iterator[Optional[str]]:
         with pytest.raises(RuntimeError):
-            yield
+            yield  # type: ignore[misc]
         yield "ok"
 
     it = iter(expect_RuntimeError())
     next(it)
-    assert e.send(it) == "ok"
+    assert e.send(it) == "ok"  # type: ignore[arg-type]
     with pytest.raises(AlreadyUsedError):
-        e.send(it)
+        e.send(it)  # type: ignore[arg-type]
 
 
 def test_Outcome_eq_hash() -> None:
@@ -62,7 +62,7 @@ def test_Outcome_eq_hash() -> None:
     v3 = Value("hello")
     v4 = Value("hello")
     assert v1 == v2
-    assert v1 != v3  # type: ignore
+    assert v1 != v3  # type: ignore[comparison-overlap]
     with pytest.raises(TypeError):
         {v1}
     assert {v3, v4} == {v3}
@@ -84,7 +84,7 @@ def test_Value_compare() -> None:
     assert Value(1) < Value(2)
     assert not Value(3) < Value(2)
     with pytest.raises(TypeError):
-        Value(1) < Value("foo")  # type: ignore
+        Value(1) < Value("foo")  # type: ignore[arg-type]
 
 
 def test_capture() -> None:
@@ -122,7 +122,7 @@ def test_traceback_frame_removal() -> None:
     assert functions[-2:] == ['unwrap', 'raise_ValueError']
 
 
-def test_Error_unwrap_does_not_create_reference_cycles():
+def test_Error_unwrap_does_not_create_reference_cycles() -> None:
     # See comment in Error.unwrap for why reference cycles are tricky
     exc = ValueError()
     err = Error(exc)
@@ -132,10 +132,12 @@ def test_Error_unwrap_does_not_create_reference_cycles():
         pass
     # Top frame in the traceback is the current test function; we don't care
     # about its references
+    assert exc.__traceback__ is not None
     assert exc.__traceback__.tb_frame is sys._getframe()
     # The next frame down is the 'unwrap' frame; we want to make sure it
     # doesn't reference the exception (or anything else for that matter, just
     # to be thorough)
+    assert exc.__traceback__.tb_next is not None
     unwrap_frame = exc.__traceback__.tb_next.tb_frame
     assert unwrap_frame.f_code.co_name == "unwrap"
     assert unwrap_frame.f_locals == {}
@@ -161,8 +163,8 @@ def test_value_covariance() -> None:
     f1(o)  # Mypy error if V is not covariant
 
 
-@pytest.mark.parametrize(  # type: ignore
-    'outcome', [Value(5), Error(ValueError())]  # type: ignore
+@pytest.mark.parametrize(
+    'outcome', [Value(5), Error(ValueError())]
 )
 def test_slots(outcome: Outcome[int]) -> None:
     assert not hasattr(outcome, '__dict__')

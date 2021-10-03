@@ -1,4 +1,6 @@
-from typing import Any, Mapping
+from typing import Any, Mapping, TypeVar
+
+E = TypeVar('E', bound=BaseException)
 
 
 class AlreadyUsedError(RuntimeError):
@@ -21,9 +23,7 @@ def fixup_module_metadata(module_name: str,
         fix_one(obj)
 
 
-# TODO: Use TypeVar(bound=BaseException) once this fix is released:
-# https://github.com/python/typeshed/pull/4298
-def remove_tb_frames(exc: BaseException, n: int) -> BaseException:
+def remove_tb_frames(exc: E, n: int) -> E:
     tb = exc.__traceback__
     for _ in range(n):
         assert tb is not None

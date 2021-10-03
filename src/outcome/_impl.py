@@ -144,15 +144,11 @@ class Error(Outcome[NoReturn]):
 
     def send(self, gen: Generator[Y, NoReturn, R]) -> Y:
         self._set_unwrapped()
-        # TODO: This ignore can be removed when this fix is released:
-        # https://github.com/python/typeshed/pull/4253
-        return gen.throw(self.error)  # type: ignore
+        return gen.throw(self.error)
 
     async def asend(self, agen: AsyncGenerator[Y, NoReturn]) -> Y:
         self._set_unwrapped()
-        # TODO: This ignore can be removed when this fix is released:
-        # https://github.com/python/typeshed/pull/4253
-        return await agen.athrow(self.error)  # type: ignore
+        return await agen.athrow(self.error)
 
 
 def capture(sync_fn: Callable[..., V], *args: Any,
