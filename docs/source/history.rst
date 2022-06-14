@@ -5,6 +5,21 @@ Release history
 
 .. towncrier release notes start
 
+Outcome 1.2.0 (2022-06-14)
+--------------------------
+
+Features
+~~~~~~~~
+
+- Add support for Python 3.9 and 3.10. (`#32 <https://github.com/python-trio/outcome/pull/32>`__)
+
+
+Deprecations and Removals
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Drop support for Python 3.6. (`#32 <https://github.com/python-trio/outcome/pull/32>`__)
+
+
 Outcome 1.1.0 (2020-11-16)
 --------------------------
 
