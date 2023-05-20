@@ -2,6 +2,7 @@
 
 set -ex
 
+CHECK_FILES="setup.py src tests"
 YAPF_VERSION=0.20.1
 
 pip install -U pip setuptools wheel
@@ -10,8 +11,8 @@ python setup.py sdist --formats=zip
 pip install dist/*.zip
 
 if [ "$CHECK_FORMATTING" = "1" ]; then
-    pip install yapf==${YAPF_VERSION} isort>=5
-    if ! yapf -rpd setup.py src tests; then
+    pip install yapf==${YAPF_VERSION} "isort>=5"
+    if ! yapf -rpd $CHECK_FILES; then
         cat <<EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -19,7 +20,7 @@ if [ "$CHECK_FORMATTING" = "1" ]; then
 Formatting problems were found (listed above). To fix them, run
 
    pip install yapf==${YAPF_VERSION}
-   yapf -rpi setup.py src tests
+   yapf -rpi $CHECK_FILES
 
 in your local checkout.
 
@@ -32,7 +33,7 @@ EOF
     # required for isort to order test imports correctly
     pip install -Ur test-requirements.txt
 
-    if ! isort --check-only --diff . ; then
+    if ! isort --check-only --diff $CHECK_FILES ; then
         cat <<EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -40,7 +41,7 @@ EOF
 Formatting problems were found (listed above). To fix them, run
 
    pip install isort
-   isort .
+   isort $CHECK_FILES
 
 in your local checkout.
 
