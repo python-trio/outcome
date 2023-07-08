@@ -23,5 +23,6 @@ def fixup_module_metadata(module_name: str, namespace: Dict[str, Any]) -> None:
 def remove_tb_frames(exc: BaseException, n: int) -> BaseException:
     tb = exc.__traceback__
     for _ in range(n):
-        tb = tb.tb_next
+        if tb is not None:
+            tb = tb.tb_next
     return exc.with_traceback(tb)
