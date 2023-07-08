@@ -193,3 +193,7 @@ class Error(Outcome[Any]):
 
 
 Maybe = Union[Value[ValueT], Error]
+"""
+A convenience alias to a union of both results. This allows type checkers to perform
+exhaustiveness checking when ``isinstance()`` is used with either class.
+"""
