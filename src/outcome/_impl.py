@@ -25,7 +25,7 @@ else:
 
 __all__ = ['Error', 'Outcome', 'Maybe', 'Value', 'acapture', 'capture']
 
-ValueT = TypeVar("ValueT")
+ValueT = TypeVar("ValueT", covariant=True)
 ResultT = TypeVar("ResultT")
 
 
