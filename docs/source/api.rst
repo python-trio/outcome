@@ -14,6 +14,12 @@ API Reference
    :members:
    :inherited-members:
 
+.. py:data:: Maybe
+   :value: Value[T] | Error
+
+   A convenience alias to a union of both results. This allows type checkers to perform
+   exhaustiveness checking when ``isinstance()`` is used with either class.
+
 .. autoclass:: Value
    :members:
    :inherited-members:
