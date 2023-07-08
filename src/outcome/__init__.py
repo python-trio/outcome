@@ -8,7 +8,10 @@ from ._impl import (
     capture as capture,
 )
 from ._util import AlreadyUsedError as AlreadyUsedError, fixup_module_metadata
+
+__version__: str
 from ._version import __version__
+
 
 __all__ = (
     'Error', 'Outcome', 'Value', 'acapture', 'capture', 'AlreadyUsedError'
