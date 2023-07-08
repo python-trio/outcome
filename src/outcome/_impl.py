@@ -27,8 +27,6 @@ __all__ = ['Error', 'Outcome', 'Maybe', 'Value', 'acapture', 'capture']
 
 ValueT = TypeVar("ValueT")
 ResultT = TypeVar("ResultT")
-T_co = TypeVar("T_co", covariant=True)
-T_contra = TypeVar("T_contra", contravariant=True)
 
 
 def capture(
