@@ -2,8 +2,16 @@ from __future__ import annotations
 
 import abc
 from typing import (
-    TYPE_CHECKING, Any, AsyncGenerator, Awaitable, Callable, Generator,
-    Generic, TypeVar, Union)
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    Awaitable,
+    Callable,
+    Generator,
+    Generic,
+    TypeVar,
+    Union,
+)
 
 import attr
 
