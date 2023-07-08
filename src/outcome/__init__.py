@@ -3,6 +3,7 @@
 from ._impl import (
     Error as Error,
     Outcome as Outcome,
+    Maybe as Maybe,
     Value as Value,
     acapture as acapture,
     capture as capture,

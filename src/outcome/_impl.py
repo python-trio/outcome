@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import (
     TYPE_CHECKING, Any, AsyncGenerator, Awaitable, Callable, Generator,
-    Generic, TypeVar)
+    Generic, TypeVar, Union)
 
 import attr
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 else:
     def final(func): return func
 
-__all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
+__all__ = ['Error', 'Outcome', 'Maybe', 'Value', 'acapture', 'capture']
 
 ValueT = TypeVar("ValueT")
 ResultT = TypeVar("ResultT")
@@ -184,3 +184,6 @@ class Error(Outcome[Any]):
     async def asend(self, agen: AsyncGenerator[ResultT, Any]) -> ResultT:
         self._set_unwrapped()
         return await agen.athrow(self.error)
+
+
+Maybe = Union[Value[ValueT], Error]
