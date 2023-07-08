@@ -21,7 +21,10 @@ if TYPE_CHECKING:
     from typing_extensions import NoReturn, ParamSpec, final
     ArgsT = ParamSpec("ArgsT")
 else:
-    def final(func): return func
+
+    def final(func):
+        return func
+
 
 __all__ = ['Error', 'Outcome', 'Maybe', 'Value', 'acapture', 'capture']
 
@@ -30,9 +33,9 @@ ResultT = TypeVar("ResultT")
 
 
 def capture(
-    sync_fn: Callable[ArgsT, ResultT],
-    *args: ArgsT.args,
-    **kwargs: ArgsT.kwargs,
+        sync_fn: Callable[ArgsT, ResultT],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
 ) -> Value[ResultT] | Error:
     """Run ``sync_fn(*args, **kwargs)`` and capture the result.
 
@@ -48,9 +51,9 @@ def capture(
 
 
 async def acapture(
-    async_fn: Callable[ArgsT, Awaitable[ResultT]],
-    *args: ArgsT.args,
-    **kwargs: ArgsT.kwargs,
+        async_fn: Callable[ArgsT, Awaitable[ResultT]],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
 ) -> Value[ResultT] | Error:
     """Run ``await async_fn(*args, **kwargs)`` and capture the result.
 
@@ -155,7 +158,9 @@ class Error(Outcome['NoReturn']):
 
     """
 
-    error: BaseException = attr.ib(validator=attr.validators.instance_of(BaseException))
+    error: BaseException = attr.ib(
+        validator=attr.validators.instance_of(BaseException)
+    )
     """The contained exception object."""
 
     def __repr__(self) -> str:
