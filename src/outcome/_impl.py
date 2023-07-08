@@ -150,7 +150,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
 
 @final
 @attr.s(frozen=True, repr=False, slots=True)
-class Error(Outcome[Any]):
+class Error(Outcome['NoReturn']):
     """Concrete :class:`Outcome` subclass representing a raised exception.
 
     """
