@@ -5,9 +5,9 @@ This doesn't have the test_ prefix, since runtime testing isn't particularly use
 from collections.abc import AsyncGenerator, Generator
 from typing import List, NoReturn, Union
 
-from outcome import Outcome, Maybe, Value, Error, capture, acapture
-
 from typing_extensions import assert_type
+
+from outcome import Error, Maybe, Outcome, Value, acapture, capture
 
 maybe: Maybe[float] = capture(len, [])
 assert_type(maybe, Union[Value[float], Error])
@@ -111,7 +111,9 @@ async def async_capture_test() -> None:
     """Test asynchronous behaviour."""
     assert_type(await acapture(async_none), Union[Value[bool], Error])
     assert_type(await acapture(async_one, 3.14), Union[Value[int], Error])
-    assert_type(await acapture(async_one, param=3.14), Union[Value[int], Error])
+    assert_type(
+        await acapture(async_one, param=3.14), Union[Value[int], Error]
+    )
     capture(async_one)  # type: ignore
     capture(async_none, 1, 2)  # type: ignore
 
