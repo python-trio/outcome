@@ -13,7 +13,7 @@ pip install dist/*.zip
 pip install -Ur test-requirements.txt
 
 if [ "$CHECK_FORMATTING" = "1" ]; then
-    pip install yapf==${YAPF_VERSION} isort>=5
+    pip install yapf==${YAPF_VERSION} isort>=5 mypy pyright
     if ! yapf -rpd setup.py src tests; then
         cat <<EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -55,10 +55,28 @@ EOF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-Type checking errors were found (listed above). To fix them, run
+Type checking errors were found (listed above). To get more detail, run
 
    pip install mypy
    mypy src/ tests/type_tests.py
+
+in your local checkout.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+EOF
+        exit 1
+    fi
+
+    if ! pyright --verifytypes outcome src/outcome/ ; then
+        cat <<EOF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Types are not complete (listed above). To get more detail, run
+
+   pip install pyright
+   pyright --verifytypes outcome src/outcome/
 
 in your local checkout.
 
