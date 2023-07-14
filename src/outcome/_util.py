@@ -6,8 +6,8 @@ class AlreadyUsedError(RuntimeError):
     pass
 
 
-def fixup_module_metadata(module_name: str, namespace: Dict[str, Any]) -> None:
-    def fix_one(obj):
+def fixup_module_metadata(module_name: str, namespace: Dict[str, object]) -> None:
+    def fix_one(obj: object) -> None:
         mod = getattr(obj, "__module__", None)
         if mod is not None and mod.startswith("outcome."):
             obj.__module__ = module_name
@@ -15,7 +15,9 @@ def fixup_module_metadata(module_name: str, namespace: Dict[str, Any]) -> None:
                 for attr_value in obj.__dict__.values():
                     fix_one(attr_value)
 
-    for objname in namespace["__all__"]:
+    all_list = namespace["__all__"]
+    assert isinstance(all_list, (tuple, list)), all_list
+    for objname in all_list:
         obj = namespace[objname]
         fix_one(obj)
 
