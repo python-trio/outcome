@@ -9,6 +9,7 @@ from typing import (
     Callable,
     Generator,
     Generic,
+    NoReturn,
     TypeVar,
     Union,
 )
@@ -18,7 +19,7 @@ import attr
 from ._util import AlreadyUsedError, remove_tb_frames
 
 if TYPE_CHECKING:
-    from typing_extensions import NoReturn, ParamSpec, final
+    from typing_extensions import ParamSpec, final
     ArgsT = ParamSpec("ArgsT")
 else:
 
@@ -153,7 +154,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
 
 @final
 @attr.s(frozen=True, repr=False, slots=True)
-class Error(Outcome['NoReturn']):
+class Error(Outcome[NoReturn]):
     """Concrete :class:`Outcome` subclass representing a raised exception.
 
     """
@@ -188,11 +189,11 @@ class Error(Outcome['NoReturn']):
             # __traceback__ from indirectly referencing 'captured_error'.
             del captured_error, self
 
-    def send(self, gen: Generator[ResultT, Any, Any]) -> ResultT:
+    def send(self, gen: Generator[ResultT, NoReturn, Any]) -> ResultT:
         self._set_unwrapped()
         return gen.throw(self.error)
 
-    async def asend(self, agen: AsyncGenerator[ResultT, Any]) -> ResultT:
+    async def asend(self, agen: AsyncGenerator[ResultT, NoReturn]) -> ResultT:
         self._set_unwrapped()
         return await agen.athrow(self.error)
 
