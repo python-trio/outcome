@@ -6,7 +6,10 @@ class AlreadyUsedError(RuntimeError):
     pass
 
 
-def fixup_module_metadata(module_name: str, namespace: Dict[str, object]) -> None:
+def fixup_module_metadata(
+        module_name: str,
+        namespace: Dict[str, object],
+) -> None:
     def fix_one(obj: object) -> None:
         mod = getattr(obj, "__module__", None)
         if mod is not None and mod.startswith("outcome."):
