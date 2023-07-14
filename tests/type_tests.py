@@ -8,9 +8,13 @@ from typing import List, NoReturn, Union
 from typing_extensions import assert_type
 
 from outcome import Error, Maybe, Outcome, Value, acapture, capture
+import outcome
 
 maybe: Maybe[float] = capture(len, [])
 assert_type(maybe, Union[Value[float], Error])
+
+
+outcome.__version__ = 'dev'  # type: ignore[misc]
 
 
 def value_variance_test() -> None:
