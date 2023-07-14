@@ -9,6 +9,9 @@ pip install -U pip setuptools wheel
 python setup.py sdist --formats=zip
 pip install dist/*.zip
 
+# Install dependencies.
+pip install -Ur test-requirements.txt
+
 if [ "$CHECK_FORMATTING" = "1" ]; then
     pip install yapf==${YAPF_VERSION} isort>=5
     if ! yapf -rpd setup.py src tests; then
@@ -28,9 +31,6 @@ in your local checkout.
 EOF
         exit 1
     fi
-
-    # required for isort to order test imports correctly
-    pip install -Ur test-requirements.txt
 
     if ! isort --check-only --diff . ; then
         cat <<EOF
@@ -70,9 +70,6 @@ EOF
 
     exit 0
 fi
-
-# Actual tests
-pip install -Ur test-requirements.txt
 
 pytest -W error -ra -v tests --cov --cov-config=.coveragerc
 
