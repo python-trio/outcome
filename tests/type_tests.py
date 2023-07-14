@@ -19,7 +19,7 @@ def value_variance_test() -> None:
     value_sub: Value[bool] = Value(True)
     value_super: Value[object] = Value(None)
     value = value_sub  # Is covariant.
-    value = value_super  # type: ignore
+    value = value_super  # type: ignore[assignment]
 
 
 def outcome_test() -> None:
@@ -28,7 +28,7 @@ def outcome_test() -> None:
     error: Error = Error(Exception())
 
     outcome_good: Outcome[List[str]] = value
-    outcome_mismatch: Outcome[bool] = Value(48.3)  # type: ignore
+    outcome_mismatch: Outcome[bool] = Value(48.3)  # type: ignore[arg-type]
     outcome_err: Outcome[List[str]] = error
 
     assert_type(outcome_good.unwrap(), List[str])
@@ -62,8 +62,8 @@ def sync_capture_test() -> None:
     assert_type(capture(sync_none), Union[Value[bool], Error])
     assert_type(capture(sync_one, 3.14), Union[Value[int], Error])
     assert_type(capture(sync_one, param=3.14), Union[Value[int], Error])
-    capture(sync_one)  # type: ignore
-    capture(sync_none, 1, 2)  # type: ignore
+    capture(sync_one)  # type: ignore[call-arg]
+    capture(sync_none, 1, 2)  # type: ignore[call-arg]
 
 
 async def sync_gen_test() -> None:
@@ -76,13 +76,13 @@ async def sync_gen_test() -> None:
 
     assert_type(outcome_one.send(sync_generator_one()), int)
     assert_type(outcome_two.send(sync_generator_two()), str)
-    outcome_one.send(sync_generator_two())  # type: ignore
-    outcome_two.send(sync_generator_one())  # type: ignore
+    outcome_one.send(sync_generator_two())  # type: ignore[arg-type]
+    outcome_two.send(sync_generator_one())  # type: ignore[arg-type]
 
     assert_type(value_one.send(sync_generator_one()), int)
     assert_type(value_two.send(sync_generator_two()), str)
-    value_one.send(sync_generator_two())  # type: ignore
-    value_two.send(sync_generator_one())  # type: ignore
+    value_one.send(sync_generator_two())  # type: ignore[arg-type]
+    value_two.send(sync_generator_one())  # type: ignore[arg-type]
 
     # Error doesn't care.
     assert_type(error.send(sync_generator_one()), int)
@@ -98,13 +98,11 @@ async def async_one(param: float) -> int:
 
 
 async def async_generator_one() -> AsyncGenerator[int, str]:
-    word: str = (yield 5)
-    assert len(word) == 3
+    assert_type((yield 5), str)
 
 
 async def async_generator_two() -> AsyncGenerator[str, int]:
-    three: int = (yield 'house')
-    assert three.bit_length() == 2
+    assert_type((yield ''), int)
 
 
 async def async_capture_test() -> None:
@@ -114,8 +112,8 @@ async def async_capture_test() -> None:
     assert_type(
         await acapture(async_one, param=3.14), Union[Value[int], Error]
     )
-    capture(async_one)  # type: ignore
-    capture(async_none, 1, 2)  # type: ignore
+    capture(async_one)  # type: ignore[call-arg]
+    capture(async_none, 1, 2)  # type: ignore[call-arg]
 
 
 async def async_gen_test() -> None:
@@ -127,13 +125,13 @@ async def async_gen_test() -> None:
 
     assert_type(await outcome_one.asend(async_generator_one()), int)
     assert_type(await outcome_two.asend(async_generator_two()), str)
-    await outcome_one.asend(async_generator_two())  # type: ignore
-    await outcome_two.asend(async_generator_one())  # type: ignore
+    await outcome_one.asend(async_generator_two())  # type: ignore[arg-type]
+    await outcome_two.asend(async_generator_one())  # type: ignore[arg-type]
 
     assert_type(await value_one.asend(async_generator_one()), int)
     assert_type(await value_two.asend(async_generator_two()), str)
-    await value_one.asend(async_generator_two())  # type: ignore
-    await value_two.asend(async_generator_one())  # type: ignore
+    await value_one.asend(async_generator_two())  # type: ignore[arg-type]
+    await value_two.asend(async_generator_one())  # type: ignore[arg-type]
 
     # Error doesn't care.
     assert_type(await error.asend(async_generator_one()), int)
