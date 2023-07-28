@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 from typing import (
     TYPE_CHECKING,
-    Any,
     AsyncGenerator,
     Awaitable,
     Callable,
@@ -104,7 +103,7 @@ class Outcome(abc.ABC, Generic[ValueT]):
         """
 
     @abc.abstractmethod
-    def send(self, gen: Generator[ResultT, ValueT, Any]) -> ResultT:
+    def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
         """Send or throw the contained value or exception into the given
         generator object.
 
@@ -143,7 +142,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
         self._set_unwrapped()
         return self.value
 
-    def send(self, gen: Generator[ResultT, ValueT, Any]) -> ResultT:
+    def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
         self._set_unwrapped()
         return gen.send(self.value)
 
@@ -189,7 +188,7 @@ class Error(Outcome[NoReturn]):
             # __traceback__ from indirectly referencing 'captured_error'.
             del captured_error, self
 
-    def send(self, gen: Generator[ResultT, NoReturn, Any]) -> ResultT:
+    def send(self, gen: Generator[ResultT, NoReturn, object]) -> ResultT:
         self._set_unwrapped()
         return gen.throw(self.error)
 
