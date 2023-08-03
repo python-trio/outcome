@@ -40,6 +40,10 @@ def outcome_test() -> None:
     assert_type(error.unwrap(), NoReturn)
 
 
+def sync_raises() -> NoReturn:
+    raise NotImplementedError
+
+
 def sync_generator_one() -> Generator[int, str, List[str]]:
     word: str = (yield 5)
     assert len(word) == 3
@@ -65,6 +69,7 @@ def sync_capture_test() -> None:
     assert_type(capture(sync_none), Union[Value[bool], Error])
     assert_type(capture(sync_one, 3.14), Union[Value[int], Error])
     assert_type(capture(sync_one, param=3.14), Union[Value[int], Error])
+    assert_type(capture(sync_raises), Error)
     capture(sync_one)  # type: ignore[call-arg]
     capture(sync_none, 1, 2)  # type: ignore[call-arg]
 
@@ -96,6 +101,10 @@ async def async_none() -> bool:
     return True
 
 
+async def async_raises() -> NoReturn:
+    raise NotImplementedError
+
+
 async def async_one(param: float) -> int:
     return round(param)
 
@@ -115,6 +124,7 @@ async def async_capture_test() -> None:
     assert_type(
         await acapture(async_one, param=3.14), Union[Value[int], Error]
     )
+    assert_type(await acapture(async_raises), Error)
     capture(async_one)  # type: ignore[call-arg]
     capture(async_none, 1, 2)  # type: ignore[call-arg]
 

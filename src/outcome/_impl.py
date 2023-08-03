@@ -11,6 +11,7 @@ from typing import (
     NoReturn,
     TypeVar,
     Union,
+    overload,
 )
 
 import attr
@@ -32,6 +33,25 @@ ValueT = TypeVar("ValueT", covariant=True)
 ResultT = TypeVar("ResultT")
 
 
+@overload
+def capture(
+        # NoReturn = raises exception, so we should get an error.
+        sync_fn: Callable[ArgsT, NoReturn],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Error:
+    ...
+
+
+@overload
+def capture(
+        sync_fn: Callable[ArgsT, ResultT],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Value[ResultT] | Error:
+    ...
+
+
 def capture(
         sync_fn: Callable[ArgsT, ResultT],
         *args: ArgsT.args,
@@ -48,6 +68,24 @@ def capture(
     except BaseException as exc:
         exc = remove_tb_frames(exc, 1)
         return Error(exc)
+
+
+@overload
+async def acapture(
+        async_fn: Callable[ArgsT, Awaitable[NoReturn]],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Error:
+    ...
+
+
+@overload
+async def acapture(
+        async_fn: Callable[ArgsT, Awaitable[ResultT]],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Value[ResultT] | Error:
+    ...
 
 
 async def acapture(
