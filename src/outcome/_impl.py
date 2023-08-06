@@ -235,8 +235,5 @@ class Error(Outcome[NoReturn]):
         return await agen.athrow(self.error)
 
 
+# A convenience alias to a union of both results, allowing exhaustiveness checking.
 Maybe = Union[Value[ValueT], Error]
-"""
-A convenience alias to a union of both results. This allows type checkers to perform
-exhaustiveness checking when ``isinstance()`` is used with either class.
-"""
