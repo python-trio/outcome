@@ -70,8 +70,8 @@ def sync_capture_test() -> None:
     assert_type(capture(sync_one, 3.14), Union[Value[int], Error])
     assert_type(capture(sync_one, param=3.14), Union[Value[int], Error])
     assert_type(capture(sync_raises), Error)
-    capture(sync_one)  # type: ignore[call-arg]
-    capture(sync_none, 1, 2)  # type: ignore[call-arg]
+    capture(sync_one)  # type: ignore[arg-type, call-arg]
+    capture(sync_none, 1, 2)  # type: ignore[arg-type, call-arg]
 
 
 async def sync_gen_test() -> None:
@@ -125,8 +125,8 @@ async def async_capture_test() -> None:
         await acapture(async_one, param=3.14), Union[Value[int], Error]
     )
     assert_type(await acapture(async_raises), Error)
-    capture(async_one)  # type: ignore[call-arg]
-    capture(async_none, 1, 2)  # type: ignore[call-arg]
+    capture(async_one)  # type: ignore[arg-type, call-arg]
+    capture(async_none, 1, 2)  # type: ignore[arg-type, call-arg]
 
 
 async def async_gen_test() -> None:
