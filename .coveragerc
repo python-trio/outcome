@@ -1,5 +1,8 @@
 [run]
 branch=True
+include=
+   src/outcome/*
+   tests/*
 
 [report]
 precision = 1
