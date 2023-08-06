@@ -19,7 +19,7 @@ def fixup_module_metadata(
                     fix_one(attr_value)
 
     all_list = namespace["__all__"]
-    assert isinstance(all_list, (tuple, list)), all_list
+    assert isinstance(all_list, (tuple, list)), repr(all_list)
     for objname in all_list:
         obj = namespace[objname]
         fix_one(obj)
