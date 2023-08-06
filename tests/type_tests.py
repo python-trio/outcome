@@ -5,7 +5,7 @@ This doesn't have the test_ prefix, since runtime testing isn't particularly use
 from collections.abc import AsyncGenerator, Generator
 from typing import List, NoReturn, Union
 
-from typing_extensions import assert_type
+from typing_extensions import assert_type, assert_never
 
 import outcome
 from outcome import Error, Maybe, Outcome, Value, acapture, capture
@@ -24,6 +24,42 @@ assert_type(maybe, Union[Value[float], Error])
 
 # Check that this is immutable.
 outcome.__version__ = 'dev'  # type: ignore[misc]
+
+
+def maybe_test_val_first(maybe: Maybe[float]) -> None:
+    """Check behaviour of the Maybe annotation, when checking Value first."""
+    assert_type(maybe, Union[Value[float], Error])
+    # Check narrowing.
+    if isinstance(maybe, Value):
+        assert_type(maybe, Value[float])
+        assert_type(maybe.value, float)
+        maybe.error  # type: ignore[attr-defined]
+    else:
+        assert_type(maybe, Error)
+        if isinstance(maybe, Error):
+            assert_type(maybe, Error)
+            assert_type(maybe.error, BaseException)
+            maybe.value  # type: ignore[attr-defined]
+        else:
+            assert_never(maybe)
+
+
+def maybe_test_err_first(maybe: Maybe[float]) -> None:
+    """Check behaviour of the Maybe annotation, when checking Error first."""
+    assert_type(maybe, Union[Value[float], Error])
+    # Check narrowing.
+    if isinstance(maybe, Error):
+        assert_type(maybe, Error)
+        assert_type(maybe.error, BaseException)
+        maybe.value  # type: ignore[attr-defined]
+    else:
+        assert_type(maybe, Value[float])
+        if isinstance(maybe, Value):
+            assert_type(maybe, Value[float])
+            assert_type(maybe.value, float)
+            maybe.error  # type: ignore[attr-defined]
+        else:
+            assert_never(maybe)
 
 
 def value_variance_test() -> None:
