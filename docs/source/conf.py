@@ -28,6 +28,13 @@ nitpicky = True
 nitpick_ignore = [
     # Format is ('sphinx reference type', 'string'), e.g.:
     ('py:obj', 'bytes-like'),
+    # Typevars aren't found, for some reason.
+    ('py:class', 'ArgsT'),
+    ('py:class', 'ArgsT.args'),
+    ('py:class', 'ArgsT.kwargs'),
+    ('py:class', 'ResultT'),
+    ('py:class', 'outcome._impl.ResultT'),
+    ('py:class', 'outcome._impl.ValueT'),
 ]
 
 # -- General configuration ------------------------------------------------
