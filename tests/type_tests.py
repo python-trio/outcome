@@ -78,7 +78,7 @@ def outcome_test() -> None:
     error: Error = Error(Exception())
 
     outcome_good: Outcome[List[str]] = value
-    outcome_mismatch: Outcome[bool] = value   # type: ignore[assignment]
+    outcome_mismatch: Outcome[bool] = value  # type: ignore[assignment]
     outcome_err: Outcome[List[str]] = error
 
     assert_type(outcome_good.unwrap(), List[str])
