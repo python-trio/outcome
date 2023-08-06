@@ -5,7 +5,7 @@ This doesn't have the test_ prefix, since runtime testing isn't particularly use
 from collections.abc import AsyncGenerator, Generator
 from typing import List, NoReturn, Union
 
-from typing_extensions import assert_type, assert_never
+from typing_extensions import assert_never, assert_type
 
 import outcome
 from outcome import Error, Maybe, Outcome, Value, acapture, capture
