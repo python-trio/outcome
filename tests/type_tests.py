@@ -38,10 +38,11 @@ def value_variance_test() -> None:
 def outcome_test() -> None:
     """Test assigning either type to the base class."""
     value: Value[List[str]] = Value(['a', 'b', 'c'])
+    bad_value: Value[float] = Value(48.3)
     error: Error = Error(Exception())
 
     outcome_good: Outcome[List[str]] = value
-    outcome_mismatch: Outcome[bool] = Value(48.3)  # type: ignore[arg-type]
+    outcome_mismatch: Outcome[bool] = value   # type: ignore[assignment]
     outcome_err: Outcome[List[str]] = error
 
     assert_type(outcome_good.unwrap(), List[str])
