@@ -10,16 +10,26 @@ from typing_extensions import assert_type
 import outcome
 from outcome import Error, Maybe, Outcome, Value, acapture, capture
 
+
+class Super:
+    """A superclass, inheriting ultimately from object."""
+
+
+class Sub(Super):
+    """A subclass."""
+
+
 maybe: Maybe[float] = capture(len, [])
 assert_type(maybe, Union[Value[float], Error])
 
+# Check that this is immutable.
 outcome.__version__ = 'dev'  # type: ignore[misc]
 
 
 def value_variance_test() -> None:
     """Check variance behaves as expected."""
-    value: Value[int]
-    value_sub: Value[bool] = Value(True)
+    value: Value[Super]
+    value_sub: Value[Sub] = Value(Sub())
     value_super: Value[object] = Value(None)
     value = value_sub  # Is covariant.
     value = value_super  # type: ignore[assignment]
