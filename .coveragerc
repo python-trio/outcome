@@ -1,6 +1,5 @@
 [run]
 branch=True
-source=src/outcome
 
 [report]
 precision = 1
