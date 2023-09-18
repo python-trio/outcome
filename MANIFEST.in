@@ -1,6 +1,7 @@
 include README.rst CHEATSHEET.rst LICENSE* CODE_OF_CONDUCT* CONTRIBUTING*
 include .coveragerc .style.yapf
 include test-requirements.txt
+include src/outcome/py.typed
 recursive-include docs *
 prune docs/build
 recursive-include tests *.py

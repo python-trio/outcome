@@ -25,6 +25,7 @@ setup(
     license='MIT OR Apache-2.0',
     packages=find_packages('src'),
     package_dir={'': 'src'},
+    include_package_data=True,
     install_requires=['attrs>=19.2.0'],
     python_requires='>=3.7',
     keywords='result',
