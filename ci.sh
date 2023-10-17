@@ -4,7 +4,7 @@ set -ex
 
 YAPF_VERSION=0.20.1
 
-pip install -U pip setuptools wheel
+python -m pip install -U pip setuptools wheel
 
 python setup.py sdist --formats=zip
 pip install dist/*.zip
