@@ -4,4 +4,4 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing_extensions import Final
 
-__version__: 'Final[str]' = "1.2.0+dev"
+__version__: 'Final[str]' = "1.3.0"
