@@ -11,7 +11,7 @@ Outcome 1.3.0 (2023-10-17)
 Features
 ~~~~~~~~
 
-- Added type hints to the package. :py:class:`Value` and :py:class`Outcome` are now generic.
+- Added type hints to the package. :py:class:`Value` and :py:class:`Outcome` are now generic.
   A type alias was also added (:py:data:`Maybe`) for the union of :py:class:`Value`
   and :py:class:`Error`. (`#36 <https://github.com/python-trio/outcome/issues/36>`__)
 
