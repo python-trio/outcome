@@ -1,13 +1,62 @@
+from __future__ import annotations
+
 import abc
+from typing import (
+    TYPE_CHECKING,
+    AsyncGenerator,
+    Awaitable,
+    Callable,
+    Generator,
+    Generic,
+    NoReturn,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import attr
 
 from ._util import AlreadyUsedError, remove_tb_frames
 
-__all__ = ['Error', 'Outcome', 'Value', 'acapture', 'capture']
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, final
+    ArgsT = ParamSpec("ArgsT")
+else:
+
+    def final(func):
+        return func
 
 
-def capture(sync_fn, *args, **kwargs):
+__all__ = ['Error', 'Outcome', 'Maybe', 'Value', 'acapture', 'capture']
+
+ValueT = TypeVar("ValueT", covariant=True)
+ResultT = TypeVar("ResultT")
+
+
+@overload
+def capture(
+        # NoReturn = raises exception, so we should get an error.
+        sync_fn: Callable[ArgsT, NoReturn],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Error:
+    ...
+
+
+@overload
+def capture(
+        sync_fn: Callable[ArgsT, ResultT],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Value[ResultT] | Error:
+    ...
+
+
+def capture(
+        sync_fn: Callable[ArgsT, ResultT],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Value[ResultT] | Error:
     """Run ``sync_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
@@ -21,7 +70,29 @@ def capture(sync_fn, *args, **kwargs):
         return Error(exc)
 
 
-async def acapture(async_fn, *args, **kwargs):
+@overload
+async def acapture(
+        async_fn: Callable[ArgsT, Awaitable[NoReturn]],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Error:
+    ...
+
+
+@overload
+async def acapture(
+        async_fn: Callable[ArgsT, Awaitable[ResultT]],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Value[ResultT] | Error:
+    ...
+
+
+async def acapture(
+        async_fn: Callable[ArgsT, Awaitable[ResultT]],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Value[ResultT] | Error:
     """Run ``await async_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
@@ -36,7 +107,7 @@ async def acapture(async_fn, *args, **kwargs):
 
 
 @attr.s(repr=False, init=False, slots=True)
-class Outcome(abc.ABC):
+class Outcome(abc.ABC, Generic[ValueT]):
     """An abstract class representing the result of a Python computation.
 
     This class has two concrete subclasses: :class:`Value` representing a
@@ -51,15 +122,15 @@ class Outcome(abc.ABC):
     hashable.
 
     """
-    _unwrapped = attr.ib(default=False, eq=False, init=False)
+    _unwrapped: bool = attr.ib(default=False, eq=False, init=False)
 
-    def _set_unwrapped(self):
+    def _set_unwrapped(self) -> None:
         if self._unwrapped:
             raise AlreadyUsedError
         object.__setattr__(self, '_unwrapped', True)
 
     @abc.abstractmethod
-    def unwrap(self):
+    def unwrap(self) -> ValueT:
         """Return or raise the contained value or exception.
 
         These two lines of code are equivalent::
@@ -70,7 +141,7 @@ class Outcome(abc.ABC):
         """
 
     @abc.abstractmethod
-    def send(self, gen):
+    def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
         """Send or throw the contained value or exception into the given
         generator object.
 
@@ -81,7 +152,7 @@ class Outcome(abc.ABC):
         """
 
     @abc.abstractmethod
-    async def asend(self, agen):
+    async def asend(self, agen: AsyncGenerator[ResultT, ValueT]) -> ResultT:
         """Send or throw the contained value or exception into the given async
         generator object.
 
@@ -92,44 +163,48 @@ class Outcome(abc.ABC):
         """
 
 
+@final
 @attr.s(frozen=True, repr=False, slots=True)
-class Value(Outcome):
+class Value(Outcome[ValueT], Generic[ValueT]):
     """Concrete :class:`Outcome` subclass representing a regular value.
 
     """
 
-    value = attr.ib()
+    value: ValueT = attr.ib()
     """The contained value."""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Value({self.value!r})'
 
-    def unwrap(self):
+    def unwrap(self) -> ValueT:
         self._set_unwrapped()
         return self.value
 
-    def send(self, gen):
+    def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
         self._set_unwrapped()
         return gen.send(self.value)
 
-    async def asend(self, agen):
+    async def asend(self, agen: AsyncGenerator[ResultT, ValueT]) -> ResultT:
         self._set_unwrapped()
         return await agen.asend(self.value)
 
 
+@final
 @attr.s(frozen=True, repr=False, slots=True)
-class Error(Outcome):
+class Error(Outcome[NoReturn]):
     """Concrete :class:`Outcome` subclass representing a raised exception.
 
     """
 
-    error = attr.ib(validator=attr.validators.instance_of(BaseException))
+    error: BaseException = attr.ib(
+        validator=attr.validators.instance_of(BaseException)
+    )
     """The contained exception object."""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Error({self.error!r})'
 
-    def unwrap(self):
+    def unwrap(self) -> NoReturn:
         self._set_unwrapped()
         # Tracebacks show the 'raise' line below out of context, so let's give
         # this variable a name that makes sense out of context.
@@ -151,10 +226,14 @@ class Error(Outcome):
             # __traceback__ from indirectly referencing 'captured_error'.
             del captured_error, self
 
-    def send(self, it):
+    def send(self, gen: Generator[ResultT, NoReturn, object]) -> ResultT:
         self._set_unwrapped()
-        return it.throw(self.error)
+        return gen.throw(self.error)
 
-    async def asend(self, agen):
+    async def asend(self, agen: AsyncGenerator[ResultT, NoReturn]) -> ResultT:
         self._set_unwrapped()
         return await agen.athrow(self.error)
+
+
+# A convenience alias to a union of both results, allowing exhaustiveness checking.
+Maybe = Union[Value[ValueT], Error]

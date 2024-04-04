@@ -17,6 +17,7 @@ setup(
     project_urls={
         "Documentation": "https://outcome.readthedocs.io/en/latest/",
         "Chat": "https://gitter.im/python-trio/general",
+        "Changelog": "https://outcome.readthedocs.io/en/latest/history.html",
     },
     long_description=LONG_DESC,
     long_description_content_type='text/x-rst',
@@ -25,6 +26,7 @@ setup(
     license='MIT OR Apache-2.0',
     packages=find_packages('src'),
     package_dir={'': 'src'},
+    include_package_data=True,
     install_requires=['attrs>=19.2.0'],
     python_requires='>=3.7',
     keywords='result',
@@ -43,5 +45,6 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
+        'Typing :: Typed',
     ],
 )
