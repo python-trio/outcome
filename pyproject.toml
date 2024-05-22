@@ -1,18 +1,135 @@
+[build-system]
+requires = ["setuptools >= 64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="outcome"
+description="Capture the outcome of Python function calls."
+authors = [{name = "Frazer McLean", email = "frazer@frazermclean.co.uk"}]
+license = {text = "MIT OR Apache-2.0"}
+keywords = [
+    "result",
+]
+classifiers=[
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Trio",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+requires-python = ">=3.7"
+dependencies = [
+    # attrs 19.2.0 adds `eq` option to decorators
+    "attrs>=19.2.0"
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.rst"
+content-type = "text/x-rst"
+
+[project.urls]
+Homepage = "https://github.com/python-trio/outcome"
+Documentation = "https://outcome.readthedocs.io/en/latest/"
+Changelog = "https://outcome.readthedocs.io/en/latest/history.html"
+Chat = "https://gitter.im/python-trio/general"
+
+[tool.setuptools]
+# This means, just install *everything* you see under trio/, even if it
+# doesn't look like a source file, so long as it appears in MANIFEST.in:
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "outcome._version.__version__"}
+
 [tool.towncrier]
-package = "outcome"
-filename = "docs/source/history.rst"
 directory = "newsfragments"
-underlines = ["-", "~", "^"]
+filename = "docs/source/history.rst"
 issue_format = "`#{issue} <https://github.com/python-trio/outcome/issues/{issue}>`__"
+# Usage:
+# - PRs should drop a file like "issuenumber.feature" in newsfragments
+# (or "bugfix", "doc", "removal", "misc"; misc gets no text, we can
+# customize this)
+# - At release time after bumping version number, run: towncrier
+# (or towncrier --draft)
+package = "outcome"
+package_dir = "src"
+underlines = ["-", "~", "^"]
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Bugfixes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "doc"
+name = "Improved documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removal"
+name = "Removals without deprecations"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Miscellaneous internal changes"
+showcontent = true
+
+[tool.coverage.run]
+branch = true
+source_pkgs = ["outcome", "tests"]
+omit = [
+    "tests/type_tests.py",
+]
+
+[tool.coverage.report]
+precision = 1
+exclude_lines = [
+    "pragma: no cover",
+    "abc.abstractmethod",
+    "if TYPE_CHECKING.*:",
+    "@overload",
+    "raise NotImplementedError",
+]
+partial_branches = [
+    "pragma: no branch",
+    "if not TYPE_CHECKING:",
+    "if .* or not TYPE_CHECKING:",
+]
 
 [tool.isort]
 combine_as_imports = true
 profile = "black"
 skip_gitignore = true
+skip = ["./build", "./docs"]
+known_first_party = ["outcome"]
+
 
 [tool.mypy]
+python_version = "3.7"
+
 # Be strict about use of Mypy
 strict = true
+local_partial_types = true
 warn_unused_ignores = true
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -21,16 +138,19 @@ warn_unreachable = true
 warn_return_any = true
 
 # Avoid subtle backsliding
+#disallow_any_decorated = true
+disallow_any_generics = true
+disallow_any_unimported = true
 disallow_incomplete_defs = true
 disallow_subclassing_any = true
-disallow_any_unimported = true
-disallow_any_generics = true
-disallow_any_explicit = false
-
-check_untyped_defs = true
 disallow_untyped_calls = true
-disallow_untyped_defs = true
 disallow_untyped_decorators = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+disallow_any_explicit = false
 
 # DO NOT use `ignore_errors`; it doesn't apply
 # downstream and users have to deal with them.
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
