@@ -1,4 +1,4 @@
-# This file is imported from __init__.py and exec'd from setup.py
+# This file is imported from __init__.py and parsed by setuptools
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
