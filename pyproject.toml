@@ -47,7 +47,7 @@ Changelog = "https://outcome.readthedocs.io/en/latest/history.html"
 Chat = "https://gitter.im/python-trio/general"
 
 [tool.setuptools]
-# This means, just install *everything* you see under trio/, even if it
+# This means, just install *everything* you see under outcome/, even if it
 # doesn't look like a source file, so long as it appears in MANIFEST.in:
 include-package-data = true
 
