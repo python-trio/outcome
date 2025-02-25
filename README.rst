@@ -2,17 +2,17 @@
    :target: https://gitter.im/python-trio/general
    :alt: Join chatroom
 
+.. image:: https://img.shields.io/badge/forum-join%20now-blue.svg
+   :target: https://trio.discourse.group
+   :alt: Join forum
+
 .. image:: https://img.shields.io/badge/docs-read%20now-blue.svg
-   :target: https://outcome.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+   :target: https://outcome.readthedocs.io
+   :alt: Documentation
 
-.. image:: https://travis-ci.org/python-trio/trio.svg?branch=master
-   :target: https://travis-ci.org/python-trio/outcome
-   :alt: Automated test status (Linux and MacOS)
-
-.. image:: https://ci.appveyor.com/api/projects/status/c54uu4rxlgs2usmj/branch/master?svg=true
-   :target: https://ci.appveyor.com/project/RazerM/outcome/history
-   :alt: Automated test status (Windows)
+.. image:: https://img.shields.io/pypi/v/outcome.svg
+   :target: https://pypi.org/project/outcome
+   :alt: Latest PyPI version
 
 .. image:: https://codecov.io/gh/python-trio/trio/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/python-trio/outcome
