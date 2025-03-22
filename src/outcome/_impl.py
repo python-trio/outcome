@@ -180,10 +180,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
             pass
         else:
             object.__delattr__(self, "value")
-            try:
-                return v
-            finally:
-                del v
+            return v
         raise AlreadyUsedError
 
     def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
@@ -218,10 +215,7 @@ class Error(Outcome[NoReturn]):
             pass
         else:
             object.__delattr__(self, "error")
-            try:
-                return v
-            finally:
-                del v
+            return v
         raise AlreadyUsedError
 
     def unwrap(self) -> NoReturn:
