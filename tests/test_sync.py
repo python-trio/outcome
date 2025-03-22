@@ -10,8 +10,9 @@ from outcome import AlreadyUsedError, Error, Value
 def test_Outcome():
     v = Value(1)
     assert v.value == 1
-    assert v.unwrap() == 1
     assert repr(v) == "Value(1)"
+    assert v.unwrap() == 1
+    assert repr(v) == "Value(<DEAD>)"
 
     with pytest.raises(AlreadyUsedError):
         v.unwrap()
@@ -21,11 +22,12 @@ def test_Outcome():
     exc = RuntimeError("oops")
     e = Error(exc)
     assert e.error is exc
+    assert repr(e) == f"Error({exc!r})"
     with pytest.raises(RuntimeError):
         e.unwrap()
     with pytest.raises(AlreadyUsedError):
         e.unwrap()
-    assert repr(e) == f"Error({exc!r})"
+    assert repr(e) == "Error(<DEAD>)"
 
     e = Error(exc)
     with pytest.raises(TypeError):

@@ -122,13 +122,6 @@ class Outcome(abc.ABC, Generic[ValueT]):
     hashable.
 
     """
-    _unwrapped: bool = attr.ib(default=False, eq=False, init=False)
-
-    def _set_unwrapped(self) -> None:
-        if self._unwrapped:
-            raise AlreadyUsedError
-        object.__setattr__(self, '_unwrapped', True)
-
     @abc.abstractmethod
     def unwrap(self) -> ValueT:
         """Return or raise the contained value or exception.
@@ -174,19 +167,29 @@ class Value(Outcome[ValueT], Generic[ValueT]):
     """The contained value."""
 
     def __repr__(self) -> str:
-        return f'Value({self.value!r})'
+        try:
+            return f'Value({self.value!r})'
+        except AttributeError:
+            return f'Value(<DEAD>)'
 
     def unwrap(self) -> ValueT:
-        self._set_unwrapped()
-        return self.value
+        try:
+            v = self.value
+        except AttributeError:
+            pass
+        else:
+            object.__delattr__(self, "value")
+            try:
+                return v
+            finally:
+                del v
+        raise AlreadyUsedError
 
     def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
-        self._set_unwrapped()
-        return gen.send(self.value)
+        return gen.send(self.unwrap())
 
     async def asend(self, agen: AsyncGenerator[ResultT, ValueT]) -> ResultT:
-        self._set_unwrapped()
-        return await agen.asend(self.value)
+        return await agen.asend(self.unwrap())
 
 
 @final
@@ -202,13 +205,28 @@ class Error(Outcome[NoReturn]):
     """The contained exception object."""
 
     def __repr__(self) -> str:
-        return f'Error({self.error!r})'
+        try:
+            return f'Error({self.error!r})'
+        except AttributeError:
+            return 'Error(<DEAD>)'
+
+    def _unwrap_error(self) -> BaseException:
+        try:
+            v = self.error
+        except AttributeError:
+            pass
+        else:
+            object.__delattr__(self, "error")
+            try:
+                return v
+            finally:
+                del v
+        raise AlreadyUsedError
 
     def unwrap(self) -> NoReturn:
-        self._set_unwrapped()
         # Tracebacks show the 'raise' line below out of context, so let's give
         # this variable a name that makes sense out of context.
-        captured_error = self.error
+        captured_error = self._unwrap_error()
         try:
             raise captured_error
         finally:
@@ -227,12 +245,10 @@ class Error(Outcome[NoReturn]):
             del captured_error, self
 
     def send(self, gen: Generator[ResultT, NoReturn, object]) -> ResultT:
-        self._set_unwrapped()
-        return gen.throw(self.error)
+        return gen.throw(self._unwrap_error())
 
     async def asend(self, agen: AsyncGenerator[ResultT, NoReturn]) -> ResultT:
-        self._set_unwrapped()
-        return await agen.athrow(self.error)
+        return await agen.athrow(self._unwrap_error())
 
 
 # A convenience alias to a union of both results, allowing exhaustiveness checking.
