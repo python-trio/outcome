@@ -122,6 +122,7 @@ class Outcome(abc.ABC, Generic[ValueT]):
     hashable.
 
     """
+
     @abc.abstractmethod
     def unwrap(self) -> ValueT:
         """Return or raise the contained value or exception.
