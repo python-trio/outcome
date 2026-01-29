@@ -164,22 +164,22 @@ class Value(Outcome[ValueT], Generic[ValueT]):
 
     """
 
-    value: ValueT = attr.ib()
+    _value: ValueT = attr.ib()
     """The contained value."""
 
     def __repr__(self) -> str:
         try:
-            return f'Value({self.value!r})'
+            return f'Value({self._value!r})'
         except AttributeError:
             return f'Value(<AlreadyUsed>)'
 
     def unwrap(self) -> ValueT:
         try:
-            v = self.value
-        except AttributeError:
+            v = self._value
+        except AttributeError as e:
             pass
         else:
-            object.__delattr__(self, "value")
+            object.__delattr__(self, "_value")
             return v
         raise AlreadyUsedError
 
@@ -189,6 +189,14 @@ class Value(Outcome[ValueT], Generic[ValueT]):
     async def asend(self, agen: AsyncGenerator[ResultT, ValueT]) -> ResultT:
         return await agen.asend(self.unwrap())
 
+    @property
+    def value(self) -> ValueT:
+        try:
+            return self._value
+        except AttributeError as e:
+            pass
+        raise AlreadyUsedError
+
 
 @final
 @attr.s(frozen=True, repr=False, slots=True)
@@ -197,24 +205,24 @@ class Error(Outcome[NoReturn]):
 
     """
 
-    error: BaseException = attr.ib(
+    _error: BaseException = attr.ib(
         validator=attr.validators.instance_of(BaseException)
     )
     """The contained exception object."""
 
     def __repr__(self) -> str:
         try:
-            return f'Error({self.error!r})'
+            return f'Error({self._error!r})'
         except AttributeError:
             return 'Error(<AlreadyUsed>)'
 
     def _unwrap_error(self) -> BaseException:
         try:
-            v = self.error
+            v = self._error
         except AttributeError:
             pass
         else:
-            object.__delattr__(self, "error")
+            object.__delattr__(self, "_error")
             return v
         raise AlreadyUsedError
 
@@ -244,6 +252,14 @@ class Error(Outcome[NoReturn]):
 
     async def asend(self, agen: AsyncGenerator[ResultT, NoReturn]) -> ResultT:
         return await agen.athrow(self._unwrap_error())
+
+    @property
+    def error(self) -> BaseException:
+        try:
+            return self._error
+        except AttributeError:
+            pass
+        raise AlreadyUsedError
 
 
 # A convenience alias to a union of both results, allowing exhaustiveness checking.

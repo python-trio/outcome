@@ -27,7 +27,7 @@ def test_Outcome():
         e.unwrap()
     with pytest.raises(AlreadyUsedError):
         e.unwrap()
-    assert repr(e) == "Error(<DEAD>)"
+    assert repr(e) == "Error(<AlreadyUsed>)"
 
     e = Error(exc)
     with pytest.raises(TypeError):
