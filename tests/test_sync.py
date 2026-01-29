@@ -10,6 +10,7 @@ from outcome import AlreadyUsedError, Error, Value
 def test_Outcome():
     v = Value(1)
     assert v.value == 1
+    v = Value(1)
     assert repr(v) == "Value(1)"
     assert v.unwrap() == 1
     assert repr(v) == "Value(<AlreadyUsed>)"
@@ -21,13 +22,16 @@ def test_Outcome():
 
     exc = RuntimeError("oops")
     e = Error(exc)
-    assert e.error is exc
+    error = e.error
+    assert error is exc
+    e = Error(exc)
     assert repr(e) == f"Error({exc!r})"
+    e = Error(exc)
     with pytest.raises(RuntimeError):
         e.unwrap()
     with pytest.raises(AlreadyUsedError):
         e.unwrap()
-    assert repr(e) == "Error(<DEAD>)"
+    assert repr(e) == "Error(<AlreadyUsed>)"
 
     e = Error(exc)
     with pytest.raises(TypeError):
@@ -101,8 +105,9 @@ def test_capture():
 
     e = outcome.capture(raise_ValueError, "two")
     assert type(e) == Error
-    assert type(e.error) is ValueError
-    assert e.error.args == ("two",)
+    error = e.error
+    assert type(error) is ValueError
+    assert error.args == ("two",)
 
 
 def test_inheritance():

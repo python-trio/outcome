@@ -22,8 +22,9 @@ async def test_acapture():
         raise ValueError(x)
 
     e = await outcome.acapture(raise_ValueError, 9)
-    assert type(e.error) is ValueError
-    assert e.error.args == (9,)
+    error = e.error
+    assert type(error) is ValueError
+    assert error.args == (9,)
 
 
 async def test_asend():
