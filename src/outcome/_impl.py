@@ -171,7 +171,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
         try:
             return f'Value({self.value!r})'
         except AttributeError:
-            return f'Value(<DEAD>)'
+            return f'Value(<AlreadyUsed>)'
 
     def unwrap(self) -> ValueT:
         try:
@@ -206,7 +206,7 @@ class Error(Outcome[NoReturn]):
         try:
             return f'Error({self.error!r})'
         except AttributeError:
-            return 'Error(<DEAD>)'
+            return 'Error(<AlreadyUsed>)'
 
     def _unwrap_error(self) -> BaseException:
         try:

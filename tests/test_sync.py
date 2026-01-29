@@ -12,7 +12,7 @@ def test_Outcome():
     assert v.value == 1
     assert repr(v) == "Value(1)"
     assert v.unwrap() == 1
-    assert repr(v) == "Value(<DEAD>)"
+    assert repr(v) == "Value(<AlreadyUsed>)"
 
     with pytest.raises(AlreadyUsedError):
         v.unwrap()
