@@ -258,7 +258,7 @@ class Error(Outcome[NoReturn]):
             #
             #    https://github.com/python-trio/trio/issues/1770
             #
-            # In particuar, by deleting this local variables from the 'unwrap'
+            # In particuar, by deleting this local variables from the 'peek'
             # methods frame, we avoid the 'captured_error' object's
             # __traceback__ from indirectly referencing 'captured_error'.
             del captured_error, self
