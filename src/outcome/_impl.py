@@ -171,7 +171,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
         try:
             return f'Value({self._value!r})'
         except AttributeError:
-            return f'Value(<AlreadyUsed>)'
+            return 'Value(<AlreadyUsed>)'
 
     def unwrap(self) -> ValueT:
         try:
