@@ -122,6 +122,7 @@ class Outcome(abc.ABC, Generic[ValueT]):
     hashable.
 
     """
+
     @abc.abstractmethod
     def peek(self) -> ValueT:
         """Return or raise the contained value or exception, without
@@ -133,7 +134,6 @@ class Outcome(abc.ABC, Generic[ValueT]):
            x = outcome.capture(fn, *args).peek()
 
         """
-
 
     @abc.abstractmethod
     def unwrap(self) -> ValueT:
