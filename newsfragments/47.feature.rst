@@ -1,0 +1,3 @@
+Remove reference to value/error when unwrapping outcome.
+Provide a ``.peek()`` method to recieve wrapped
+value/error without invalidating the outcome.
