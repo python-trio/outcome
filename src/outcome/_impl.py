@@ -122,10 +122,23 @@ class Outcome(abc.ABC, Generic[ValueT]):
     hashable.
 
     """
+    @abc.abstractmethod
+    def peek(self) -> ValueT:
+        """Return or raise the contained value or exception, without
+        invalidating the outcome.
+
+        These two lines of code are equivalent::
+
+           x = fn(*args)
+           x = outcome.capture(fn, *args).peek()
+
+        """
+
 
     @abc.abstractmethod
     def unwrap(self) -> ValueT:
-        """Return or raise the contained value or exception.
+        """Return or raise the contained value or exception, and invalidate
+        the outcome.
 
         These two lines of code are equivalent::
 
@@ -172,6 +185,9 @@ class Value(Outcome[ValueT], Generic[ValueT]):
             return f'Value({self._value!r})'
         except AttributeError:
             return 'Value(<AlreadyUsed>)'
+
+    def peek(self) -> ValueT:
+        return self.value
 
     def unwrap(self) -> ValueT:
         try:
@@ -225,6 +241,27 @@ class Error(Outcome[NoReturn]):
             object.__delattr__(self, "_error")
             return v
         raise AlreadyUsedError
+
+    def peek(self) -> NoReturn:
+        # Tracebacks show the 'raise' line below out of context, so let's give
+        # this variable a name that makes sense out of context.
+        captured_error = self.error
+        try:
+            raise captured_error
+        finally:
+            # We want to avoid creating a reference cycle here. Python does
+            # collect cycles just fine, so it wouldn't be the end of the world
+            # if we did create a cycle, but the cyclic garbage collector adds
+            # latency to Python programs, and the more cycles you create, the
+            # more often it runs, so it's nicer to avoid creating them in the
+            # first place. For more details see:
+            #
+            #    https://github.com/python-trio/trio/issues/1770
+            #
+            # In particuar, by deleting this local variables from the 'unwrap'
+            # methods frame, we avoid the 'captured_error' object's
+            # __traceback__ from indirectly referencing 'captured_error'.
+            del captured_error, self
 
     def unwrap(self) -> NoReturn:
         # Tracebacks show the 'raise' line below out of context, so let's give

@@ -16,6 +16,7 @@ async def test_acapture():
 
     v = await outcome.acapture(add, 3, y=4)
     assert v == Value(7)
+    assert v.peek() == 7
 
     async def raise_ValueError(x):
         await asyncio.sleep(0)
@@ -24,6 +25,10 @@ async def test_acapture():
     e = await outcome.acapture(raise_ValueError, 9)
     assert type(e.error) is ValueError
     assert e.error.args == (9,)
+    with pytest.raises(ValueError):
+        e.peek()
+    with pytest.raises(ValueError):
+        e.unwrap()
 
 
 async def test_asend():
