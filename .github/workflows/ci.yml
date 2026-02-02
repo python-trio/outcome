@@ -2,6 +2,9 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  id-token: write
+
 jobs:
   Windows:
     name: 'Windows (${{ matrix.python }})'
@@ -23,9 +26,15 @@ jobs:
       - name: Run tests
         run: ./ci.sh
         shell: bash
-        env:
-          # Should match 'name:' up above
-          JOB_NAME: 'Windows (${{ matrix.python }})'
+      - if: always()
+        uses: codecov/codecov-action@v5
+        with:
+          name: Windows (${{ matrix.python }})
+          # multiple flags is marked as an error in codecov UI, but is actually fine
+          # https://github.com/codecov/feedback/issues/567
+          flags: Windows,${{ matrix.python }}
+          fail_ci_if_error: true
+          use_oidc: true
 
   Ubuntu:
     name: 'Ubuntu (${{ matrix.python }}${{ matrix.extra_name }})'
@@ -60,8 +69,13 @@ jobs:
         run: ./ci.sh
         env:
           CHECK_FORMATTING: '${{ matrix.check_formatting }}'
-          # Should match 'name:' up above
-          JOB_NAME: 'Ubuntu (${{ matrix.python }}${{ matrix.extra_name }})'
+      - if: always() && matrix.check_formatting != '1'
+        uses: codecov/codecov-action@v5
+        with:
+          name: Ubuntu (${{ matrix.python }}${{ matrix.extra_name }})
+          flags: Ubuntu,${{ matrix.python }}
+          fail_ci_if_error: true
+          use_oidc: true
 
   macOS:
     name: 'macOS (${{ matrix.python }})'
@@ -85,3 +99,10 @@ jobs:
         env:
           # Should match 'name:' up above
           JOB_NAME: 'macOS (${{ matrix.python }})'
+      - if: always()
+        uses: codecov/codecov-action@v5
+        with:
+          name: macOS (${{ matrix.python }})
+          flags: macOS,${{ matrix.python }}
+          fail_ci_if_error: true
+          use_oidc: true
