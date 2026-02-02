@@ -131,7 +131,3 @@ fi
 echo "::group:: Run Tests"
 pytest -W error -ra -v tests --cov --cov-config=.coveragerc
 echo "::endgroup::"
-
-echo "::group:: Code Coverage"
-bash <(curl -s https://codecov.io/bash)
-echo "::endgroup::"
