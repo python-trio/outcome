@@ -24,10 +24,13 @@ def test_Outcome():
     e = Error(exc)
     assert e.error is exc
     assert repr(e) == f"Error({exc!r})"
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError) as exc_info:
         e.peek()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError) as exc_info2:
         e.unwrap()
+
+    assert exc_info.value is not exc_info2.value
+
     with pytest.raises(AlreadyUsedError):
         e.unwrap()
     assert repr(e) == "Error(<AlreadyUsed>)"

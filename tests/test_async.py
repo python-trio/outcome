@@ -25,10 +25,12 @@ async def test_acapture():
     e = await outcome.acapture(raise_ValueError, 9)
     assert type(e.error) is ValueError
     assert e.error.args == (9,)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
         e.peek()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info2:
         e.unwrap()
+
+    assert exc_info.value is not exc_info2.value
 
 
 async def test_asend():

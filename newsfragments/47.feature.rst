@@ -1,3 +1,4 @@
 Remove reference to value/error when unwrapping outcome.
 Provide a ``.peek()`` method to recieve wrapped
-value/error without invalidating the outcome.
+value or a copy of the wrapped error
+without invalidating the outcome.

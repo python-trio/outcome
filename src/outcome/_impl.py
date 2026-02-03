@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 from typing import (
     TYPE_CHECKING,
     AsyncGenerator,
@@ -125,10 +126,10 @@ class Outcome(abc.ABC, Generic[ValueT]):
 
     @abc.abstractmethod
     def peek(self) -> ValueT:
-        """Return or raise the contained value or exception, without
-        invalidating the outcome.
+        """Return the contained value or raise a copy of the contained
+        exception, without invalidating the outcome.
 
-        These two lines of code are equivalent::
+        These two lines of code are almost equivalent::
 
            x = fn(*args)
            x = outcome.capture(fn, *args).peek()
@@ -245,7 +246,7 @@ class Error(Outcome[NoReturn]):
     def peek(self) -> NoReturn:
         # Tracebacks show the 'raise' line below out of context, so let's give
         # this variable a name that makes sense out of context.
-        captured_error = self.error
+        captured_error = copy.copy(self.error)
         try:
             raise captured_error
         finally:
