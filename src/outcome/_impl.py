@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 from typing import (
     TYPE_CHECKING,
     AsyncGenerator,
@@ -122,16 +123,23 @@ class Outcome(abc.ABC, Generic[ValueT]):
     hashable.
 
     """
-    _unwrapped: bool = attr.ib(default=False, eq=False, init=False)
 
-    def _set_unwrapped(self) -> None:
-        if self._unwrapped:
-            raise AlreadyUsedError
-        object.__setattr__(self, '_unwrapped', True)
+    @abc.abstractmethod
+    def peek(self) -> ValueT:
+        """Return the contained value or raise a copy of the contained
+        exception, without invalidating the outcome.
+
+        These two lines of code are almost equivalent::
+
+           x = fn(*args)
+           x = outcome.capture(fn, *args).peek()
+
+        """
 
     @abc.abstractmethod
     def unwrap(self) -> ValueT:
-        """Return or raise the contained value or exception.
+        """Return or raise the contained value or exception, and invalidate
+        the outcome.
 
         These two lines of code are equivalent::
 
@@ -170,23 +178,36 @@ class Value(Outcome[ValueT], Generic[ValueT]):
 
     """
 
-    value: ValueT = attr.ib()
-    """The contained value."""
+    _value: ValueT = attr.ib()
 
     def __repr__(self) -> str:
-        return f'Value({self.value!r})'
+        try:
+            return f'Value({self._value!r})'
+        except AttributeError:
+            return 'Value(<AlreadyUsed>)'
 
-    def unwrap(self) -> ValueT:
-        self._set_unwrapped()
+    def peek(self) -> ValueT:
         return self.value
 
+    def unwrap(self) -> ValueT:
+        v = self.value
+        object.__delattr__(self, "_value")
+        return v
+
     def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
-        self._set_unwrapped()
-        return gen.send(self.value)
+        return gen.send(self.unwrap())
 
     async def asend(self, agen: AsyncGenerator[ResultT, ValueT]) -> ResultT:
-        self._set_unwrapped()
-        return await agen.asend(self.value)
+        return await agen.asend(self.unwrap())
+
+    @property
+    def value(self) -> ValueT:
+        """The contained value."""
+        try:
+            return self._value
+        except AttributeError as e:
+            pass
+        raise AlreadyUsedError
 
 
 @final
@@ -196,19 +217,46 @@ class Error(Outcome[NoReturn]):
 
     """
 
-    error: BaseException = attr.ib(
+    _error: BaseException = attr.ib(
         validator=attr.validators.instance_of(BaseException)
     )
-    """The contained exception object."""
 
     def __repr__(self) -> str:
-        return f'Error({self.error!r})'
+        try:
+            return f'Error({self._error!r})'
+        except AttributeError:
+            return 'Error(<AlreadyUsed>)'
 
-    def unwrap(self) -> NoReturn:
-        self._set_unwrapped()
+    def _unwrap_error(self) -> BaseException:
+        v = self.error
+        object.__delattr__(self, "_error")
+        return v
+
+    def peek(self) -> NoReturn:
         # Tracebacks show the 'raise' line below out of context, so let's give
         # this variable a name that makes sense out of context.
-        captured_error = self.error
+        captured_error = copy.copy(self.error)
+        try:
+            raise captured_error
+        finally:
+            # We want to avoid creating a reference cycle here. Python does
+            # collect cycles just fine, so it wouldn't be the end of the world
+            # if we did create a cycle, but the cyclic garbage collector adds
+            # latency to Python programs, and the more cycles you create, the
+            # more often it runs, so it's nicer to avoid creating them in the
+            # first place. For more details see:
+            #
+            #    https://github.com/python-trio/trio/issues/1770
+            #
+            # In particuar, by deleting this local variables from the 'peek'
+            # methods frame, we avoid the 'captured_error' object's
+            # __traceback__ from indirectly referencing 'captured_error'.
+            del captured_error, self
+
+    def unwrap(self) -> NoReturn:
+        # Tracebacks show the 'raise' line below out of context, so let's give
+        # this variable a name that makes sense out of context.
+        captured_error = self._unwrap_error()
         try:
             raise captured_error
         finally:
@@ -227,12 +275,19 @@ class Error(Outcome[NoReturn]):
             del captured_error, self
 
     def send(self, gen: Generator[ResultT, NoReturn, object]) -> ResultT:
-        self._set_unwrapped()
-        return gen.throw(self.error)
+        return gen.throw(self._unwrap_error())
 
     async def asend(self, agen: AsyncGenerator[ResultT, NoReturn]) -> ResultT:
-        self._set_unwrapped()
-        return await agen.athrow(self.error)
+        return await agen.athrow(self._unwrap_error())
+
+    @property
+    def error(self) -> BaseException:
+        """The contained exception object."""
+        try:
+            return self._error
+        except AttributeError:
+            pass
+        raise AlreadyUsedError
 
 
 # A convenience alias to a union of both results, allowing exhaustiveness checking.
