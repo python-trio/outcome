@@ -190,14 +190,9 @@ class Value(Outcome[ValueT], Generic[ValueT]):
         return self.value
 
     def unwrap(self) -> ValueT:
-        try:
-            v = self._value
-        except AttributeError as e:
-            pass
-        else:
-            object.__delattr__(self, "_value")
-            return v
-        raise AlreadyUsedError
+        v = self.value
+        object.__delattr__(self, "_value")
+        return v
 
     def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
         return gen.send(self.unwrap())
@@ -233,14 +228,9 @@ class Error(Outcome[NoReturn]):
             return 'Error(<AlreadyUsed>)'
 
     def _unwrap_error(self) -> BaseException:
-        try:
-            v = self._error
-        except AttributeError:
-            pass
-        else:
-            object.__delattr__(self, "_error")
-            return v
-        raise AlreadyUsedError
+        v = self.error
+        object.__delattr__(self, "_error")
+        return v
 
     def peek(self) -> NoReturn:
         # Tracebacks show the 'raise' line below out of context, so let's give
