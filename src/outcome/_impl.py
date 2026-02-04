@@ -179,7 +179,6 @@ class Value(Outcome[ValueT], Generic[ValueT]):
     """
 
     _value: ValueT = attr.ib()
-    """The contained value."""
 
     def __repr__(self) -> str:
         try:
@@ -208,6 +207,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
 
     @property
     def value(self) -> ValueT:
+        """The contained value."""
         try:
             return self._value
         except AttributeError as e:
@@ -225,7 +225,6 @@ class Error(Outcome[NoReturn]):
     _error: BaseException = attr.ib(
         validator=attr.validators.instance_of(BaseException)
     )
-    """The contained exception object."""
 
     def __repr__(self) -> str:
         try:
@@ -293,6 +292,7 @@ class Error(Outcome[NoReturn]):
 
     @property
     def error(self) -> BaseException:
+        """The contained exception object."""
         try:
             return self._error
         except AttributeError:
