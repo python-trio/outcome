@@ -200,7 +200,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
         self._set_unwrapped()
         return self.value
 
-    def unwrap_and_destroy(self):
+    def unwrap_and_destroy(self) -> ValueT:
         self._set_unwrapped()
         v = self.value
         object.__delattr__(self, "value")
