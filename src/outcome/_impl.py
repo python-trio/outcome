@@ -194,7 +194,7 @@ class Value(Outcome[ValueT], Generic[ValueT]):
         try:
             return f'Value({self.value!r})'
         except AttributeError:
-            return f'Value(<AlreadyDestroyed>)'
+            return 'Value(<AlreadyDestroyed>)'
 
     def unwrap(self) -> ValueT:
         self._set_unwrapped()
