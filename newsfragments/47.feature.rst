@@ -1,0 +1,5 @@
+Add ``unwrap_and_destroy`` method to remove references to
+the wrapped exception or value to prevent issues where
+values not being garbage collected when they are no longer
+needed, or worse problems with exceptions leaving a
+reference cycle.
