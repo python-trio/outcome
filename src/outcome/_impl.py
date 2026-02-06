@@ -231,7 +231,7 @@ class Error(Outcome[NoReturn]):
         try:
             return f'Error({self.error!r})'
         except AttributeError:
-            return f'Error(<AlreadyDestroyed>)'
+            return 'Error(<AlreadyDestroyed>)'
 
     def unwrap(self) -> NoReturn:
         self._set_unwrapped()
