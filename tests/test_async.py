@@ -5,6 +5,13 @@ import pytest
 
 import outcome
 from outcome import AlreadyUsedError, Error, Value
+import weakref
+import sys
+import contextlib
+import types
+import outcome
+import platform
+import gc
 
 pytestmark = pytest.mark.asyncio
 
@@ -58,3 +65,60 @@ async def test_traceback_frame_removal():
     frames = traceback.extract_tb(exc_info.value.__traceback__)
     functions = [function for _, _, function, _ in frames]
     assert functions[-2:] == ['unwrap', 'raise_ValueError']
+
+
+@types.coroutine
+def async_yield(v):
+    return (yield v)
+
+
+async def test_unwrap_leaves_a_refcycle():
+    class MyException(Exception):
+        pass
+
+    async def network_operation():
+        return (await async_yield("network operation")).unwrap()
+
+    async def coro_fn():
+        try:
+            await network_operation()
+        except MyException as e:
+            wr_e = weakref.ref(e)
+            del e
+
+        if platform.python_implementation() == "PyPy":
+            gc.collect()
+        assert isinstance(wr_e(), MyException)
+
+    with contextlib.closing(coro_fn()) as coro:
+        assert coro.send(None) == "network operation"
+        with pytest.raises(StopIteration):
+            coro.send(outcome.Error(MyException()))
+
+
+async def test_unwrap_and_destroy_does_not_leave_a_refcycle():
+    class MyException(Exception):
+        pass
+
+    async def network_operation():
+        return (await async_yield("network operation")).unwrap_and_destroy()
+
+    async def coro_fn():
+        try:
+            await network_operation()
+        except MyException as e:
+            wr_e = weakref.ref(e)
+            del e
+
+        if platform.python_implementation() == "PyPy":
+            gc.collect()
+        assert wr_e() is None
+
+    with contextlib.closing(coro_fn()) as coro:
+        assert coro.send(None) == "network operation"
+        with pytest.raises(StopIteration):
+            coro.send(outcome.Error(MyException()))
+
+
+if __name__ == "__main__":
+    sys.exit(main())
