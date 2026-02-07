@@ -117,7 +117,3 @@ async def test_unwrap_and_destroy_does_not_leave_a_refcycle():
         assert coro.send(None) == "network operation"
         with pytest.raises(StopIteration):
             coro.send(outcome.Error(MyException()))
-
-
-if __name__ == "__main__":
-    sys.exit(main())
