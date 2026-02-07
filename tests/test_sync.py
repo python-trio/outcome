@@ -16,7 +16,11 @@ def test_Outcome():
     with pytest.raises(AlreadyUsedError):
         v.unwrap()
 
-    v = Value(1)
+    v = Value(2)
+    assert v.unwrap_and_destroy() == 2
+    assert repr(v) == "Value(<AlreadyDestroyed>)"
+    with pytest.raises(AlreadyUsedError):
+        v.unwrap_and_destroy()
 
     exc = RuntimeError("oops")
     e = Error(exc)
@@ -33,12 +37,20 @@ def test_Outcome():
     with pytest.raises(TypeError):
         Error(RuntimeError)
 
+    e2 = Error(exc)
+    with pytest.raises(RuntimeError):
+        e2.unwrap_and_destroy()
+    with pytest.raises(AlreadyUsedError):
+        e2.unwrap_and_destroy()
+    assert repr(e2) == "Error(<AlreadyDestroyed>)"
+
     def expect_1():
         assert (yield) == 1
         yield "ok"
 
     it = iter(expect_1())
     next(it)
+    v = Value(1)
     assert v.send(it) == "ok"
     with pytest.raises(AlreadyUsedError):
         v.send(it)

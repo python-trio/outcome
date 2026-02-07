@@ -138,6 +138,23 @@ class Outcome(abc.ABC, Generic[ValueT]):
            x = fn(*args)
            x = outcome.capture(fn, *args).unwrap()
 
+        Note: this leaves a reference to the contained value or exception
+        alive which may result in values not being garbage collected or
+        exceptions leaving a reference cycle. If this is an issue it's
+        recommended to call the ``unwrap_and_destroy()`` method
+
+        """
+
+    @abc.abstractmethod
+    def unwrap_and_destroy(self) -> ValueT:
+        """Return or raise the contained value or exception, remove the
+        reference to the contained value or exception.
+
+        These two lines of code are equivalent::
+
+           x = fn(*args)
+           x = outcome.capture(fn, *args).unwrap_and_destroy()
+
         """
 
     @abc.abstractmethod
@@ -174,11 +191,20 @@ class Value(Outcome[ValueT], Generic[ValueT]):
     """The contained value."""
 
     def __repr__(self) -> str:
-        return f'Value({self.value!r})'
+        try:
+            return f'Value({self.value!r})'
+        except AttributeError:
+            return 'Value(<AlreadyDestroyed>)'
 
     def unwrap(self) -> ValueT:
         self._set_unwrapped()
         return self.value
+
+    def unwrap_and_destroy(self) -> ValueT:
+        self._set_unwrapped()
+        v = self.value
+        object.__delattr__(self, "value")
+        return v
 
     def send(self, gen: Generator[ResultT, ValueT, object]) -> ResultT:
         self._set_unwrapped()
@@ -202,13 +228,39 @@ class Error(Outcome[NoReturn]):
     """The contained exception object."""
 
     def __repr__(self) -> str:
-        return f'Error({self.error!r})'
+        try:
+            return f'Error({self.error!r})'
+        except AttributeError:
+            return 'Error(<AlreadyDestroyed>)'
 
     def unwrap(self) -> NoReturn:
         self._set_unwrapped()
         # Tracebacks show the 'raise' line below out of context, so let's give
         # this variable a name that makes sense out of context.
         captured_error = self.error
+        try:
+            raise captured_error
+        finally:
+            # We want to avoid creating a reference cycle here. Python does
+            # collect cycles just fine, so it wouldn't be the end of the world
+            # if we did create a cycle, but the cyclic garbage collector adds
+            # latency to Python programs, and the more cycles you create, the
+            # more often it runs, so it's nicer to avoid creating them in the
+            # first place. For more details see:
+            #
+            #    https://github.com/python-trio/trio/issues/1770
+            #
+            # In particuar, by deleting this local variables from the 'unwrap'
+            # methods frame, we avoid the 'captured_error' object's
+            # __traceback__ from indirectly referencing 'captured_error'.
+            del captured_error, self
+
+    def unwrap_and_destroy(self) -> NoReturn:
+        self._set_unwrapped()
+        # Tracebacks show the 'raise' line below out of context, so let's give
+        # this variable a name that makes sense out of context.
+        captured_error = self.error
+        object.__delattr__(self, "error")
         try:
             raise captured_error
         finally:
