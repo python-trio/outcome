@@ -1,17 +1,16 @@
 import asyncio
+import contextlib
+import gc
+import platform
+import sys
 import traceback
+import types
+import weakref
 
 import pytest
 
 import outcome
 from outcome import AlreadyUsedError, Error, Value
-import weakref
-import sys
-import contextlib
-import types
-import outcome
-import platform
-import gc
 
 pytestmark = pytest.mark.asyncio
 
