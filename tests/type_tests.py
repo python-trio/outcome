@@ -111,12 +111,25 @@ def sync_one(param: float) -> int:
     return round(param)
 
 
+def sync_keyword(*, sync_fn: float) -> int:
+    return round(sync_fn)
+
+
 def sync_capture_test() -> None:
     """Test synchronous behaviour."""
     assert_type(capture(sync_none), Union[Value[bool], Error])
     assert_type(capture(sync_one, 3.14), Union[Value[int], Error])
     assert_type(capture(sync_one, param=3.14), Union[Value[int], Error])
     assert_type(capture(sync_raises), Error)
+    assert_type(capture(sync_keyword, sync_fn=3.14), Union[Value[int], Error])
+    assert_type(capture(sync_fn=sync_none), Union[Value[bool], Error])
+    assert_type(
+        capture(sync_fn=sync_one, param=3.14), Union[Value[int], Error]
+    )
+    assert_type(capture(sync_fn=sync_raises), Error)
+    capture(sync_fn=sync_one)  # type: ignore[call-overload]
+    capture(sync_fn=sync_one, param="bad")  # type: ignore[call-overload]
+    capture(sync_keyword, sync_fn="bad")  # type: ignore[call-overload]
     capture(sync_one)  # type: ignore[call-overload]
     capture(sync_none, 1, 2)  # type: ignore[call-overload]
 
@@ -156,6 +169,10 @@ async def async_one(param: float) -> int:
     return round(param)
 
 
+async def async_keyword(*, async_fn: float) -> int:
+    return round(async_fn)
+
+
 async def async_generator_one() -> AsyncGenerator[int, str]:
     assert_type((yield 5), str)
 
@@ -172,6 +189,18 @@ async def async_capture_test() -> None:
         await acapture(async_one, param=3.14), Union[Value[int], Error]
     )
     assert_type(await acapture(async_raises), Error)
+    assert_type(
+        await acapture(async_keyword, async_fn=3.14), Union[Value[int], Error]
+    )
+    assert_type(await acapture(async_fn=async_none), Union[Value[bool], Error])
+    assert_type(
+        await acapture(async_fn=async_one, param=3.14),
+        Union[Value[int], Error]
+    )
+    assert_type(await acapture(async_fn=async_raises), Error)
+    await acapture(async_fn=async_one)  # type: ignore[call-overload]
+    await acapture(async_fn=async_one, param=0j)  # type: ignore[call-overload]
+    await acapture(async_keyword, async_fn=0j)  # type: ignore[call-overload]
     capture(async_one)  # type: ignore[call-overload]
     capture(async_none, 1, 2)  # type: ignore[call-overload]
 

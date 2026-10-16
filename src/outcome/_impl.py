@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 from typing import (
     TYPE_CHECKING,
+    Any,
     AsyncGenerator,
     Awaitable,
     Callable,
@@ -37,9 +38,29 @@ ResultT = TypeVar("ResultT")
 def capture(
         # NoReturn = raises exception, so we should get an error.
         sync_fn: Callable[ArgsT, NoReturn],
+        /,
         *args: ArgsT.args,
         **kwargs: ArgsT.kwargs,
 ) -> Error:
+    ...
+
+
+@overload
+def capture(
+        sync_fn: Callable[ArgsT, NoReturn],
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Error:
+    ...
+
+
+@overload
+def capture(
+        sync_fn: Callable[ArgsT, ResultT],
+        /,
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Value[ResultT] | Error:
     ...
 
 
@@ -52,22 +73,39 @@ def capture(
     ...
 
 
-def capture(
-        sync_fn: Callable[ArgsT, ResultT],
-        *args: ArgsT.args,
-        **kwargs: ArgsT.kwargs,
-) -> Value[ResultT] | Error:
+def capture(*args: Any, **kwargs: Any) -> Value[Any] | Error:
     """Run ``sync_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
       Either a :class:`Value` or :class:`Error` as appropriate.
 
     """
+    # A positional callable leaves every keyword available for forwarding.
+    # Without one, accept the original callable-by-keyword convention.
+    if args:
+        sync_fn, args = args[0], args[1:]
+    elif "sync_fn" in kwargs:
+        sync_fn = kwargs.pop("sync_fn")
+    else:
+        raise TypeError(
+            "capture() missing 1 required positional argument: 'sync_fn'"
+        )
+
     try:
         return Value(sync_fn(*args, **kwargs))
     except BaseException as exc:
         exc = remove_tb_frames(exc, 1)
         return Error(exc)
+
+
+@overload
+async def acapture(
+        async_fn: Callable[ArgsT, Awaitable[NoReturn]],
+        /,
+        *args: ArgsT.args,
+        **kwargs: ArgsT.kwargs,
+) -> Error:
+    ...
 
 
 @overload
@@ -82,23 +120,40 @@ async def acapture(
 @overload
 async def acapture(
         async_fn: Callable[ArgsT, Awaitable[ResultT]],
+        /,
         *args: ArgsT.args,
         **kwargs: ArgsT.kwargs,
 ) -> Value[ResultT] | Error:
     ...
 
 
+@overload
 async def acapture(
         async_fn: Callable[ArgsT, Awaitable[ResultT]],
         *args: ArgsT.args,
         **kwargs: ArgsT.kwargs,
 ) -> Value[ResultT] | Error:
+    ...
+
+
+async def acapture(*args: Any, **kwargs: Any) -> Value[Any] | Error:
     """Run ``await async_fn(*args, **kwargs)`` and capture the result.
 
     Returns:
       Either a :class:`Value` or :class:`Error` as appropriate.
 
     """
+    # A positional callable leaves every keyword available for forwarding.
+    # Without one, accept the original callable-by-keyword convention.
+    if args:
+        async_fn, args = args[0], args[1:]
+    elif "async_fn" in kwargs:
+        async_fn = kwargs.pop("async_fn")
+    else:
+        raise TypeError(
+            "acapture() missing 1 required positional argument: 'async_fn'"
+        )
+
     try:
         return Value(await async_fn(*args, **kwargs))
     except BaseException as exc:

@@ -1,0 +1,11 @@
+Allow ``capture(fn, sync_fn=value)`` and
+``await acapture(fn, async_fn=value)`` to forward those keywords to the
+positional callable. Previously valid calls, including selecting the callable
+by keyword when no positional arguments are supplied, remain supported.
+
+Runtime signatures and annotations now expose ``*args: Any, **kwargs: Any``
+with return annotation ``Value[Any] | Error``; reflective binding tools may
+observe different behavior, while static overloads retain precise typing.
+Malformed ``acapture()`` calls now raise the missing-callable ``TypeError``
+when awaited rather than when the coroutine is constructed; malformed-call
+tracebacks and diagnostic precedence can also differ.

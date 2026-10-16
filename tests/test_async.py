@@ -48,13 +48,63 @@ async def test_asend():
         await my_agen.asend(None)
 
 
-async def test_traceback_frame_removal():
+@pytest.mark.parametrize("raises", [False, True])
+async def test_acapture_accepts_legacy_callable_keyword(raises):
+    value = object()
+    error = ValueError("captured")
+
+    async def fn(*, value):
+        await asyncio.sleep(0)
+        if raises:
+            raise error
+        return value
+
+    result = await outcome.acapture(async_fn=fn, value=value)
+    if raises:
+        assert isinstance(result, Error)
+        assert result.error is error
+    else:
+        assert result.unwrap() is value
+
+
+@pytest.mark.parametrize("raises", [False, True])
+async def test_acapture_forwards_async_fn_keyword(raises):
+    value = object()
+    error = ValueError("captured")
+
+    async def fn(*, async_fn):
+        await asyncio.sleep(0)
+        assert async_fn is value
+        if raises:
+            raise error
+        return async_fn
+
+    result = await outcome.acapture(fn, async_fn=value)
+    if raises:
+        assert isinstance(result, Error)
+        assert result.error is error
+    else:
+        assert result.unwrap() is value
+
+
+@pytest.mark.parametrize("legacy_keyword", [False, True])
+async def test_traceback_frame_removal(legacy_keyword):
     async def raise_ValueError(x):
         raise ValueError(x)
 
-    e = await outcome.acapture(raise_ValueError, 'abc')
+    if legacy_keyword:
+        e = await outcome.acapture(async_fn=raise_ValueError, x='abc')
+    else:
+        e = await outcome.acapture(raise_ValueError, 'abc')
     with pytest.raises(ValueError) as exc_info:
         e.unwrap()
     frames = traceback.extract_tb(exc_info.value.__traceback__)
     functions = [function for _, _, function, _ in frames]
     assert functions[-2:] == ['unwrap', 'raise_ValueError']
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"unrelated": 1}])
+async def test_acapture_requires_callable(kwargs):
+    with pytest.raises(TypeError,
+                       match="missing 1 required positional argument"):
+        await outcome.acapture(**kwargs)
