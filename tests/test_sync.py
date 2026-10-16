@@ -108,11 +108,52 @@ def test_inheritance():
     assert issubclass(Error, outcome.Outcome)
 
 
-def test_traceback_frame_removal():
+@pytest.mark.parametrize("raises", [False, True])
+def test_capture_accepts_legacy_callable_keyword(raises):
+    value = object()
+    error = ValueError("captured")
+
+    def fn(*, value):
+        if raises:
+            raise error
+        return value
+
+    result = outcome.capture(sync_fn=fn, value=value)
+    if raises:
+        assert isinstance(result, Error)
+        assert result.error is error
+    else:
+        assert result.unwrap() is value
+
+
+@pytest.mark.parametrize("raises", [False, True])
+def test_capture_forwards_sync_fn_keyword(raises):
+    value = object()
+    error = ValueError("captured")
+
+    def fn(*, sync_fn):
+        assert sync_fn is value
+        if raises:
+            raise error
+        return sync_fn
+
+    result = outcome.capture(fn, sync_fn=value)
+    if raises:
+        assert isinstance(result, Error)
+        assert result.error is error
+    else:
+        assert result.unwrap() is value
+
+
+@pytest.mark.parametrize("legacy_keyword", [False, True])
+def test_traceback_frame_removal(legacy_keyword):
     def raise_ValueError(x):
         raise ValueError(x)
 
-    e = outcome.capture(raise_ValueError, 'abc')
+    if legacy_keyword:
+        e = outcome.capture(sync_fn=raise_ValueError, x='abc')
+    else:
+        e = outcome.capture(raise_ValueError, 'abc')
     with pytest.raises(ValueError) as exc_info:
         e.unwrap()
     frames = traceback.extract_tb(exc_info.value.__traceback__)
@@ -137,3 +178,10 @@ def test_Error_unwrap_does_not_create_reference_cycles():
     unwrap_frame = exc.__traceback__.tb_next.tb_frame
     assert unwrap_frame.f_code.co_name == "unwrap"
     assert unwrap_frame.f_locals == {}
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"unrelated": 1}])
+def test_capture_requires_callable(kwargs):
+    with pytest.raises(TypeError,
+                       match="missing 1 required positional argument"):
+        outcome.capture(**kwargs)
