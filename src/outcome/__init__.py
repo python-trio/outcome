@@ -1,6 +1,9 @@
 """Top-level package for outcome."""
 
 from ._impl import (
+    ValueT,  # Keep Value's postponed annotations resolvable in this module.
+)
+from ._impl import (
     Error as Error,
     Maybe as Maybe,
     Outcome as Outcome,
